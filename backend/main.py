@@ -1,6 +1,7 @@
 from fastapi import FastAPI
 from pydantic import BaseModel
 from services.model_loader import predict_crop
+from services.model_loader2 import predict_yield
 
 app = FastAPI()
 
@@ -13,7 +14,22 @@ class CropFeatures(BaseModel):
     ph: float
     rainfall: float
 
-@app.post("/predict/")
+class YieldFeatures(BaseModel):
+    latitude: float
+    longitude: float
+    NDVI: float
+    GNDVI: float
+    NDWI: float
+    SAVI: float
+    soil_moisture: float
+    temperature: float
+    rainfall: float
+    crop_type:int
+    NDVI_temp: float
+    NDVI_rainfall: float
+    SAVI_soil_moisture: float
+
+@app.post("/crop-predict/")
 async def predict(features: CropFeatures):
     """API endpoint to predict the recommended crop."""
     feature_list = [
@@ -24,6 +40,22 @@ async def predict(features: CropFeatures):
     try:
         prediction = predict_crop(feature_list)
         return {"recommended_crop": str(prediction)}  # Ensure response is JSON serializable
+    except Exception as e:
+        return {"error": str(e)}  # Return error details for debugging
+
+@app.post("/yield-predict/")
+async def predict_yield_model(features: YieldFeatures):
+    """API endpoint to predict crop yield."""
+    feature_list = [
+        features.latitude, features.longitude, features.NDVI, features.GNDVI,
+        features.NDWI, features.SAVI, features.soil_moisture, features.crop_type,
+        features.temperature,features.rainfall, features.NDVI_temp, features.NDVI_rainfall, features.SAVI_soil_moisture
+    ]
+
+    try:
+        # Convert features to numpy array and make prediction
+        prediction = predict_yield(feature_list)
+        return {"predicted_yield": prediction}   # Convert numpy output to JSON serializable format
     except Exception as e:
         return {"error": str(e)}  # Return error details for debugging
 
