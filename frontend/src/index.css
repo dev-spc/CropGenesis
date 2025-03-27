@@ -1,0 +1,94 @@
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 240 10% 3.9%;
+    --card: 0 0% 100%;
+    --card-foreground: 240 10% 3.9%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 240 10% 3.9%;
+    --primary: 240 5.9% 10%;
+    --primary-foreground: 0 0% 98%;
+    --secondary: 240 4.8% 95.9%;
+    --secondary-foreground: 240 5.9% 10%;
+    --muted: 240 4.8% 95.9%;
+    --muted-foreground: 240 3.8% 46.1%;
+    --accent: 240 4.8% 95.9%;
+    --accent-foreground: 240 5.9% 10%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 220 13% 91%;
+    --input: 220 13% 91%;
+    --ring: 224 71.4% 45.1%;
+    --radius: 0.75rem;
+  }
+
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground antialiased overflow-x-hidden;
+    font-feature-settings: "ss01", "ss02", "cv01", "cv02";
+  }
+}
+
+@layer components {
+  .glass-panel {
+    @apply bg-white/80 backdrop-blur-lg border border-white/20 shadow-lg rounded-2xl;
+  }
+  
+  .glass-card {
+    @apply bg-white/90 backdrop-blur-md shadow-md border border-gray-100 rounded-xl transition-all duration-300 hover:shadow-lg;
+  }
+
+  .google-shadow {
+    box-shadow: 0 2px 10px rgba(66, 133, 244, 0.1), 
+                0 4px 20px rgba(66, 133, 244, 0.05);
+  }
+
+  .subtle-grid {
+    background-image: linear-gradient(rgba(176, 176, 176, 0.05) 1px, transparent 1px),
+                      linear-gradient(to right, rgba(176, 176, 176, 0.05) 1px, transparent 1px);
+    background-size: 30px 30px;
+  }
+
+  .upload-zone {
+    @apply relative border-2 border-dashed rounded-2xl p-12 text-center transition-all duration-300
+           flex flex-col items-center justify-center cursor-pointer overflow-hidden;
+  }
+
+  .upload-zone-idle {
+    @apply border-gray-200 hover:border-google-blue/50;
+  }
+
+  .upload-zone-drag {
+    @apply border-google-blue bg-google-blue/5;
+  }
+
+  .beautiful-transition {
+    @apply transition-all duration-300 ease-in-out;
+  }
+
+  .text-balance {
+    text-wrap: balance;
+  }
+}
+
+@layer utilities {
+  .animation-delay-200 {
+    animation-delay: 200ms;
+  }
+  
+  .animation-delay-500 {
+    animation-delay: 500ms;
+  }
+  
+  .animation-delay-700 {
+    animation-delay: 700ms;
+  }
+}
