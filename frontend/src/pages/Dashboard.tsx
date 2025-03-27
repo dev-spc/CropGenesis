@@ -33,6 +33,78 @@ const Dashboard = () => {
     please upload images from multiple angles.
   `;
 
+  const indianStates = [
+    { value: "AN", label: "Andaman and Nicobar Islands" },
+    { value: "AP", label: "Andhra Pradesh" },
+    { value: "AR", label: "Arunachal Pradesh" },
+    { value: "AS", label: "Assam" },
+    { value: "BR", label: "Bihar" },
+    { value: "CH", label: "Chandigarh" },
+    { value: "CT", label: "Chhattisgarh" },
+    { value: "DN", label: "Dadra and Nagar Haveli and Daman and Diu" },
+    { value: "DL", label: "Delhi" },
+    { value: "GA", label: "Goa" },
+    { value: "GJ", label: "Gujarat" },
+    { value: "HR", label: "Haryana" },
+    { value: "HP", label: "Himachal Pradesh" },
+    { value: "JK", label: "Jammu and Kashmir" },
+    { value: "JH", label: "Jharkhand" },
+    { value: "KA", label: "Karnataka" },
+    { value: "KL", label: "Kerala" },
+    { value: "LA", label: "Ladakh" },
+    { value: "LD", label: "Lakshadweep" },
+    { value: "MP", label: "Madhya Pradesh" },
+    { value: "MH", label: "Maharashtra" },
+    { value: "MN", label: "Manipur" },
+    { value: "ML", label: "Meghalaya" },
+    { value: "MZ", label: "Mizoram" },
+    { value: "NL", label: "Nagaland" },
+    { value: "OD", label: "Odisha" },
+    { value: "PY", label: "Puducherry" },
+    { value: "PB", label: "Punjab" },
+    { value: "RJ", label: "Rajasthan" },
+    { value: "SK", label: "Sikkim" },
+    { value: "TN", label: "Tamil Nadu" },
+    { value: "TG", label: "Telangana" },
+    { value: "TR", label: "Tripura" },
+    { value: "UP", label: "Uttar Pradesh" },
+    { value: "UK", label: "Uttarakhand" },
+    { value: "WB", label: "West Bengal" }
+  ];
+
+  const crops = [
+    'Bajra',        // 0
+    'Barley',       // 1
+    'Black Pepper', // 2
+    'Cardamom',     // 3
+    'Cashew Nut',   // 4
+    'Coconut',      // 5
+    'Coffee',       // 6
+    'Cotton',       // 7
+    'Ginger',       // 8
+    'Groundnut',    // 9
+    'Jowar',        // 10
+    'Linseed',      // 11
+    'Maize',        // 12
+    'Millets',      // 13
+    'Mustard',      // 14
+    'Oil Palm',     // 15
+    'Pulses',       // 16
+    'Ragi',         // 17
+    'Rice',         // 18
+    'Rubber',       // 19
+    'Saffron',      // 20
+    'Sesame',       // 21
+    'Sorghum',      // 22
+    'Soybean',      // 23
+    'Sugarcane',    // 24
+    'Sunflower',    // 25
+    'Tea',          // 26
+    'Tobacco',      // 27
+    'Turmeric',     // 28
+    'Wheat'         // 29
+  ];
+
   const handleFormSubmit = (event: React.FormEvent) => {
     event.preventDefault();
     // Form submission logic would go here
@@ -106,7 +178,6 @@ const Dashboard = () => {
             </Card>
           </TabsContent>
           
-          {/* Crop Management Tab */}
           <TabsContent value="cropManagement">
             <Card className="shadow-sm border-0 glass-panel">
               <CardHeader>
@@ -122,37 +193,32 @@ const Dashboard = () => {
                   <form onSubmit={handleFormSubmit} className="space-y-6">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                       <div className="space-y-3">
-                        <Label htmlFor="cropName">Crop Name</Label>
-                        <Input id="cropName" placeholder="Enter crop name" />
+                        <Label htmlFor="cropName">Nitrogen (N)</Label>
+                        <Input id="cropName" type="number"  placeholder="Enter nitrogen amount" />
                       </div>
-                      
                       <div className="space-y-3">
-                        <Label htmlFor="cropVariety">Crop Variety</Label>
-                        <Select>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Select variety" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="variety1">Variety 1</SelectItem>
-                            <SelectItem value="variety2">Variety 2</SelectItem>
-                            <SelectItem value="variety3">Variety 3</SelectItem>
-                          </SelectContent>
-                        </Select>
+                        <Label htmlFor="cropName">Phosphorus (P)</Label>
+                        <Input id="cropName" type="number"  placeholder="Enter phosphorus amount" />
                       </div>
-                      
                       <div className="space-y-3">
-                        <Label htmlFor="plantingDate">Planting Date</Label>
-                        <Input id="plantingDate" type="date" />
+                        <Label htmlFor="cropName">Potassium (K)</Label>
+                        <Input id="cropName" type="number"  placeholder="Enter potassium amount" />
                       </div>
-                      
                       <div className="space-y-3">
-                        <Label htmlFor="fieldSize">Field Size (acres)</Label>
-                        <Input id="fieldSize" type="number" placeholder="0.0" min="0" step="0.1" />
+                        <Label htmlFor="cropName">Temperature</Label>
+                        <Input id="cropName" type="number"  placeholder="Enter temperature" />
                       </div>
-                      
-                      <div className="space-y-3 md:col-span-2">
-                        <Label htmlFor="notes">Additional Notes</Label>
-                        <Textarea id="notes" placeholder="Enter any additional information..." />
+                      <div className="space-y-3">
+                        <Label htmlFor="cropName">Humidity</Label>
+                        <Input id="cropName" type="number"  placeholder="Enter humidity" />
+                      </div>
+                      <div className="space-y-3">
+                        <Label htmlFor="cropName">pH</Label>
+                        <Input id="cropName" type="number"  placeholder="Enter pH value" />
+                      </div>
+                      <div className="space-y-3">
+                        <Label htmlFor="cropName">Rainfall</Label>
+                        <Input id="cropName" type="number"  placeholder="Enter rainfall amount" />
                       </div>
                     </div>
                     
@@ -167,7 +233,7 @@ const Dashboard = () => {
             </Card>
           </TabsContent>
           
-          {/* Additional Settings Tab */}
+
           <TabsContent value="settings">
             <Card className="shadow-sm border-0 glass-panel">
               <CardHeader>
@@ -183,42 +249,78 @@ const Dashboard = () => {
                   <form onSubmit={handleFormSubmit} className="space-y-6">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                       <div className="space-y-3">
-                        <Label htmlFor="notificationPreference">Notification Preference</Label>
+                        <Label htmlFor="notificationPreference">States</Label>
                         <Select>
                           <SelectTrigger>
-                            <SelectValue placeholder="Select preference" />
+                            <SelectValue placeholder="Select state" />
                           </SelectTrigger>
                           <SelectContent>
-                            <SelectItem value="email">Email</SelectItem>
-                            <SelectItem value="push">Push Notification</SelectItem>
-                            <SelectItem value="both">Both</SelectItem>
+                            {indianStates.map((item, index)=><SelectItem key={index} value={item.value}>{item.label}</SelectItem>)}
                           </SelectContent>
                         </Select>
                       </div>
                       
                       <div className="space-y-3">
-                        <Label htmlFor="analysisFrequency">Analysis Frequency</Label>
+                        <Label htmlFor="analysisFrequency">Crop Type</Label>
                         <Select>
                           <SelectTrigger>
-                            <SelectValue placeholder="Select frequency" />
+                            <SelectValue placeholder="Select crop type" />
                           </SelectTrigger>
                           <SelectContent>
-                            <SelectItem value="daily">Daily</SelectItem>
-                            <SelectItem value="weekly">Weekly</SelectItem>
-                            <SelectItem value="monthly">Monthly</SelectItem>
+                            <SelectItem value="rabi">Rabi</SelectItem>
+                            <SelectItem value="kharif">Kharif</SelectItem>
+                            <SelectItem value="zaid">Zaid</SelectItem>
                           </SelectContent>
                         </Select>
                       </div>
-                      
-                      <div className="space-y-3 md:col-span-2">
-                        <Label htmlFor="email">Email Address</Label>
-                        <Input id="email" type="email" placeholder="Enter your email address" />
+
+                      <div className="space-y-3">
+                        <Label htmlFor="states">Crops</Label>
+                        <Select>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select crop" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {crops.map((item, index)=><SelectItem key={index} value={item}>{item}</SelectItem>)}
+                          </SelectContent>
+                        </Select>
+                      </div>
+
+                      <div className="space-y-3">
+                        <Label htmlFor="cropName">Nitrogen (N)</Label>
+                        <Input id="cropName" type="number"  placeholder="Enter nitrogen amount" />
+                      </div>
+
+                      <div className="space-y-3">
+                        <Label htmlFor="cropName">Phosphorus (P)</Label>
+                        <Input id="cropName" type="number"  placeholder="Enter phosphorus amount" />
+                      </div>
+
+                      <div className="space-y-3">
+                        <Label htmlFor="cropName">Potassium (K)</Label>
+                        <Input id="cropName" type="number"  placeholder="Enter potassium amount" />
+                      </div>
+
+                      <div className="space-y-3">
+                        <Label htmlFor="cropName">Temperature</Label>
+                        <Input id="cropName" type="number"  placeholder="Enter temperature" />
                       </div>
                       
-                      <div className="space-y-3 md:col-span-2">
-                        <Label htmlFor="preferences">Preferences</Label>
-                        <Textarea id="preferences" placeholder="Enter any additional preferences..." />
+                      <div className="space-y-3">
+                        <Label htmlFor="cropName">pH</Label>
+                        <Input id="cropName" type="number"  placeholder="Enter pH value" />
                       </div>
+
+                      <div className="space-y-3">
+                        <Label htmlFor="cropName">Rainfall</Label>
+                        <Input id="cropName" type="number"  placeholder="Enter rainfall amount" />
+                      </div>
+
+                      <div className="space-y-3">
+                        <Label htmlFor="area">Area (in hectare)</Label>
+                        <Input id="area" type="number"  placeholder="Enter area" />
+                      </div>
+
                     </div>
                     
                     <div className="flex justify-end">
@@ -234,7 +336,6 @@ const Dashboard = () => {
         </Tabs>
       </main>
       
-      {/* Add the ChatBot component */}
       <ChatBot />
     </div>
   );
