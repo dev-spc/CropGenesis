@@ -2,7 +2,7 @@ from fastapi import FastAPI
 from pydantic import BaseModel
 from services.model_loader import predict_crop
 from services.model_loader2 import predict_yield
-
+from services.scaler_model_loader import normalize_features
 app = FastAPI()
 
 class CropFeatures(BaseModel):
@@ -45,19 +45,24 @@ async def predict(features: CropFeatures):
 
 @app.post("/yield-predict/")
 async def predict_yield_model(features: YieldFeatures):
-    """API endpoint to predict crop yield."""
+    """API endpoint to predict crop yield with normalized inputs."""
     feature_list = [
         features.latitude, features.longitude, features.NDVI, features.GNDVI,
         features.NDWI, features.SAVI, features.soil_moisture, features.crop_type,
-        features.temperature,features.rainfall, features.NDVI_temp, features.NDVI_rainfall, features.SAVI_soil_moisture
+        features.temperature, features.rainfall, features.NDVI_temp, features.NDVI_rainfall,
+        features.SAVI_soil_moisture
     ]
-
+    
     try:
-        # Convert features to numpy array and make prediction
-        prediction = predict_yield(feature_list)
-        return {"predicted_yield": prediction}   # Convert numpy output to JSON serializable format
+        # Normalize the features using the scaler function
+        normalized_features = normalize_features(feature_list)
+
+        # Make prediction
+        prediction = predict_yield(normalized_features)
+        return {"predicted_yield": prediction}
+    
     except Exception as e:
-        return {"error": str(e)}  # Return error details for debugging
+        return {"error": str(e)}
 
 if __name__ == "__main__":
     import uvicorn
