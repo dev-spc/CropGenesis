@@ -1,8 +1,9 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, UploadFile, File
 from pydantic import BaseModel
 from services.model_loader import predict_crop
 from services.model_loader2 import predict_yield
 from services.scaler_model_loader import normalize_features
+from services.plant_disease_model_loader import predict_disease
 app = FastAPI()
 
 class CropFeatures(BaseModel):
@@ -63,6 +64,13 @@ async def predict_yield_model(features: YieldFeatures):
     
     except Exception as e:
         return {"error": str(e)}
+
+@app.post("/plant-disease/")
+async def predict_plant_disease(file: UploadFile = File(...)):
+        image_bytes = await file.read()
+        prediction = predict_disease(image_bytes)
+        return {"predicted_disease": prediction}
+
 
 if __name__ == "__main__":
     import uvicorn
