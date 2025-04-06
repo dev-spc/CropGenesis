@@ -16,6 +16,7 @@ import axios from 'axios';
 const Dashboard = () => {
   const [showAnalysisResults, setShowAnalysisResults] = useState(false);
   const [analysisResponse, setAnalysisResponse] = useState<string | number>('');
+  const [cropJustification, setCropJustification] = useState<string>('');
   const [isLoading, setIsLoading] = useState(false);
   const [cropData, setCropData] = useState({
     N: 0,
@@ -48,44 +49,44 @@ const Dashboard = () => {
     setShowAnalysisResults(false);
   };
 
-  const indianStates = [
-    { value: "AN", label: "Andaman and Nicobar Islands" },
-    { value: "AP", label: "Andhra Pradesh" },
-    { value: "AR", label: "Arunachal Pradesh" },
-    { value: "AS", label: "Assam" },
-    { value: "BR", label: "Bihar" },
-    { value: "CH", label: "Chandigarh" },
-    { value: "CT", label: "Chhattisgarh" },
-    { value: "DN", label: "Dadra and Nagar Haveli and Daman and Diu" },
-    { value: "DL", label: "Delhi" },
-    { value: "GA", label: "Goa" },
-    { value: "GJ", label: "Gujarat" },
-    { value: "HR", label: "Haryana" },
-    { value: "HP", label: "Himachal Pradesh" },
-    { value: "JK", label: "Jammu and Kashmir" },
-    { value: "JH", label: "Jharkhand" },
-    { value: "KA", label: "Karnataka" },
-    { value: "KL", label: "Kerala" },
-    { value: "LA", label: "Ladakh" },
-    { value: "LD", label: "Lakshadweep" },
-    { value: "MP", label: "Madhya Pradesh" },
-    { value: "MH", label: "Maharashtra" },
-    { value: "MN", label: "Manipur" },
-    { value: "ML", label: "Meghalaya" },
-    { value: "MZ", label: "Mizoram" },
-    { value: "NL", label: "Nagaland" },
-    { value: "OD", label: "Odisha" },
-    { value: "PY", label: "Puducherry" },
-    { value: "PB", label: "Punjab" },
-    { value: "RJ", label: "Rajasthan" },
-    { value: "SK", label: "Sikkim" },
-    { value: "TN", label: "Tamil Nadu" },
-    { value: "TG", label: "Telangana" },
-    { value: "TR", label: "Tripura" },
-    { value: "UP", label: "Uttar Pradesh" },
-    { value: "UK", label: "Uttarakhand" },
-    { value: "WB", label: "West Bengal" }
-  ];
+  // const indianStates = [
+  //   { value: "AN", label: "Andaman and Nicobar Islands" },
+  //   { value: "AP", label: "Andhra Pradesh" },
+  //   { value: "AR", label: "Arunachal Pradesh" },
+  //   { value: "AS", label: "Assam" },
+  //   { value: "BR", label: "Bihar" },
+  //   { value: "CH", label: "Chandigarh" },
+  //   { value: "CT", label: "Chhattisgarh" },
+  //   { value: "DN", label: "Dadra and Nagar Haveli and Daman and Diu" },
+  //   { value: "DL", label: "Delhi" },
+  //   { value: "GA", label: "Goa" },
+  //   { value: "GJ", label: "Gujarat" },
+  //   { value: "HR", label: "Haryana" },
+  //   { value: "HP", label: "Himachal Pradesh" },
+  //   { value: "JK", label: "Jammu and Kashmir" },
+  //   { value: "JH", label: "Jharkhand" },
+  //   { value: "KA", label: "Karnataka" },
+  //   { value: "KL", label: "Kerala" },
+  //   { value: "LA", label: "Ladakh" },
+  //   { value: "LD", label: "Lakshadweep" },
+  //   { value: "MP", label: "Madhya Pradesh" },
+  //   { value: "MH", label: "Maharashtra" },
+  //   { value: "MN", label: "Manipur" },
+  //   { value: "ML", label: "Meghalaya" },
+  //   { value: "MZ", label: "Mizoram" },
+  //   { value: "NL", label: "Nagaland" },
+  //   { value: "OD", label: "Odisha" },
+  //   { value: "PY", label: "Puducherry" },
+  //   { value: "PB", label: "Punjab" },
+  //   { value: "RJ", label: "Rajasthan" },
+  //   { value: "SK", label: "Sikkim" },
+  //   { value: "TN", label: "Tamil Nadu" },
+  //   { value: "TG", label: "Telangana" },
+  //   { value: "TR", label: "Tripura" },
+  //   { value: "UP", label: "Uttar Pradesh" },
+  //   { value: "UK", label: "Uttarakhand" },
+  //   { value: "WB", label: "West Bengal" }
+  // ];
 
   const crops = [
     'Bajra',        // 0
@@ -134,8 +135,12 @@ const Dashboard = () => {
     event.preventDefault();
     setIsLoading(true);
     try {
-      const result = await axios.post('http://127.0.0.1:8000/crop-predict/', cropData);
+      const result = await axios.post('https://cropgenesis.duckdns.org/crop-predict/', cropData);
       setAnalysisResponse(result.data.recommended_crop);
+      const res = await axios.post('https://cropgenesis.duckdns.org/generate/2', {
+        prompt: String(result.data.recommended_crop +" and the inputs are the following json"+JSON.stringify(cropData)),
+      });
+      setCropJustification(res.data.response);
     } catch (error) {
       console.error('Error predicting crop:', error);
       setAnalysisResponse('Error predicting crop. Please try again.');
@@ -161,8 +166,9 @@ const Dashboard = () => {
     event.preventDefault();
     setIsLoading(true);
     try {
-      const result = await axios.post('http://127.0.0.1:8000/yield-predict/', yieldData);
+      const result = await axios.post('https://cropgenesis.duckdns.org/yield-predict/', yieldData);
       setAnalysisResponse(result.data.predicted_yield);
+      
     } catch (error) {
       console.error('Error predicting yield:', error);
       setAnalysisResponse('Error predicting yield. Please try again.');
@@ -353,6 +359,11 @@ const Dashboard = () => {
                     <div className="bg-gray-50 p-6 rounded-lg border border-gray-100">
                       <pre className="whitespace-pre-wrap font-mono text-sm bg-white p-4 rounded border border-gray-200">
                         Recommended crop: {analysisResponse}
+                      </pre>
+                    </div>
+                    <div className="bg-gray-50 p-6 mt-4 rounded-lg border border-gray-100">
+                      <pre className="whitespace-pre-wrap font-mono text-sm bg-white p-4 rounded border border-gray-200">
+                        {cropJustification}
                       </pre>
                     </div>
                   </div>

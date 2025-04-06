@@ -126,12 +126,12 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({ maxSize = 10, onImageSubm
       formData.append('file', blob, 'image.jpg');
       formData.append('image', uploadedImage);
 
-      const result = await axios.post('http://127.0.0.1:8000/plant-disease/', formData, {
+      const result = await axios.post('https://cropgenesis.duckdns.org/plant-disease/', formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },
       });
-      const res = await axios.post('http://127.0.0.1:8000/generate', {
+      const res = await axios.post('https://cropgenesis.duckdns.org/generate/1', {
         prompt: result.data.predicted_disease,
       });
       setAnalysisResponse(res.data.response);

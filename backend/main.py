@@ -17,8 +17,11 @@ app = FastAPI()
 # Configure the API key
 genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
 
-def generate_text(prompt: str):
-    system_prompt = "You are an agricultural expert—given a crop and its disease, write 80–100 words with a short intro, 3 spaced bullet points (identification, control, crop management), and a brief conclusion—no asterisks, keep it professional and concise. No styling like bolds or italics."
+def generate_text(prompt: str, systemId: int):
+    if(systemId==1):
+        system_prompt = "You are an agricultural expert—given a crop and its disease, write 80–100 words with a short intro, 3 spaced bullet points (identification, control, crop management), and a brief conclusion—no asterisks, keep it professional and concise. No styling like bolds or italics."
+    elif(systemId==2):
+        system_prompt = "You are an expert agronomist and data scientist. Given a crop name and JSON input containing agronomic and environmental data (N, P, K, temperature, humidity, pH, rainfall), justify why the crop is suitable. Summarize the input, explain the significance of each parameter, and provide scientific reasoning for the recommendation. Compare with less suitable crops if relevant. Include potential challenges, best practices, and tips to optimize yield. Conclude with a brief summary. Do not ask follow-up questions. Assume standard values if any data is missing. Response must be within 80–100 words."
     model = genai.GenerativeModel('gemini-1.5-flash')
     response = model.generate_content(system_prompt + "\n" + prompt)
     return response.text
@@ -35,10 +38,10 @@ app.add_middleware(
 class PromptInput(BaseModel):
     prompt: str
 
-@app.post("/generate")
-async def generate_text_endpoint(input_data: PromptInput):
+@app.post("/generate/{systemId}")
+async def generate_text_endpoint(input_data: PromptInput, systemId: int):
     try:
-        response = generate_text(input_data.prompt)
+        response = generate_text(input_data.prompt, systemId)
         return {"response": response}
     except Exception as e:
         print(f"Error: {str(e)}")
@@ -113,4 +116,4 @@ async def predict_plant_disease(file: UploadFile = File(...)):
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run(app, host="127.0.0.1", port=8000)
+    uvicorn.run(app, host="0.0.0.0", port=8000)

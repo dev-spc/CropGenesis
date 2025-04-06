@@ -5,6 +5,7 @@ import { ArrowRight, Crop, Image, Zap } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import AnimatedBackground from '@/components/AnimatedBackground';
 import Navbar from '@/components/Navbar';
+import farm from '/public/farm.png'
 
 const Index = () => {
   const navigate = useNavigate();
@@ -12,7 +13,7 @@ const Index = () => {
   const features = [
     {
       icon: <p className="h-6 w-6 text-google-blue text-center" >🌾</p>,
-      title: "Planr Village Model",
+      title: "Plant Village Model",
       description: "A unified system to support rural agriculture through smart planning and tech-driven insights."
     },
     {
@@ -67,9 +68,9 @@ const Index = () => {
           </div>
           
           <div className="mt-32 mb-16 glass-panel p-8 w-full max-w-5xl opacity-0 animate-fadeIn animation-delay-700">
-            <div className="w-full h-[300px] bg-gray-100 rounded-lg overflow-hidden relative">
+            <div className="w-full h-[500px] bg-gray-100 rounded-lg overflow-hidden relative">
               <div className="absolute inset-0 flex items-center justify-center text-gray-400">
-                <span className="text-sm">Dashboard Preview</span>
+                <img src={farm} alt='Farm' className='object-fill'></img>
               </div>
             </div>
           </div>
