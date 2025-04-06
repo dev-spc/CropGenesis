@@ -96,7 +96,7 @@ const Index = () => {
         </section>
         
         <footer className="py-8 text-center text-sm text-gray-500 border-t border-gray-100 mb-12">
-          <p>© 2023 CropGenesis. All rights reserved.</p>
+          <p>© 2025 CropGenesis. All rights reserved.</p>
         </footer>
       </main>
     </div>
