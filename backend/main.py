@@ -1,10 +1,49 @@
 from fastapi import FastAPI, UploadFile, File
+from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from services.model_loader import predict_crop
 from services.model_loader2 import predict_yield
 from services.scaler_model_loader import normalize_features
 from services.plant_disease_model_loader import predict_disease
+import google.generativeai as genai
+from dotenv import load_dotenv
+import os
+
+# Load environment variables
+load_dotenv()
+
 app = FastAPI()
+
+# Configure the API key
+genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
+
+def generate_text(prompt: str):
+    system_prompt = "You are an agricultural expert—given a crop and its disease, write 80–100 words with a short intro, 3 spaced bullet points (identification, control, crop management), and a brief conclusion—no asterisks, keep it professional and concise. No styling like bolds or italics."
+    model = genai.GenerativeModel('gemini-1.5-flash')
+    response = model.generate_content(system_prompt + "\n" + prompt)
+    return response.text
+
+# Configure CORS
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # Allows all origins
+    allow_credentials=True,
+    allow_methods=["*"],  # Allows all methods
+    allow_headers=["*"],  # Allows all headers
+)
+
+class PromptInput(BaseModel):
+    prompt: str
+
+@app.post("/generate")
+async def generate_text_endpoint(input_data: PromptInput):
+    try:
+        response = generate_text(input_data.prompt)
+        return {"response": response}
+    except Exception as e:
+        print(f"Error: {str(e)}")
+        return {"error": str(e)}
+
 
 class CropFeatures(BaseModel):
     N: int

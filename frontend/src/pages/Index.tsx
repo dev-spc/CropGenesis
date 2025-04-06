@@ -11,19 +11,19 @@ const Index = () => {
   
   const features = [
     {
-      icon: <Image className="h-6 w-6 text-google-blue" />,
-      title: "Easy Upload",
-      description: "Simple drag & drop interface for all your images"
+      icon: <p className="h-6 w-6 text-google-blue text-center" >🌾</p>,
+      title: "Planr Village Model",
+      description: "A unified system to support rural agriculture through smart planning and tech-driven insights."
     },
     {
-      icon: <Crop className="h-6 w-6 text-google-red" />,
-      title: "Smart Cropping",
-      description: "Advanced tools to perfect your image dimensions"
+      icon: <p className="h-6 w-6 text-google-red text-center" >🌱</p>,
+      title: "Crop Recommendation",
+      description: "AI-powered suggestions based on soil, weather, and regional trends to help farmers grow the right crops."
     },
     {
-      icon: <Zap className="h-6 w-6 text-google-yellow" />,
-      title: "Fast Processing",
-      description: "Lightning fast processing for immediate results"
+      icon: <p className="h-6 w-6 text-google-yellow text-center" >📈</p>,
+      title: "Yield Prediction",
+      description: "Accurate yield forecasts using satellite data and machine learning for better harvest planning and pricing."
     }
   ];
 
@@ -36,7 +36,7 @@ const Index = () => {
         {/* Hero Section */}
         <section className="flex flex-col items-center text-center mb-24">
           <span className="px-4 py-1.5 text-xs font-medium text-google-blue bg-google-blue/10 rounded-full mb-6 opacity-0 animate-fadeIn">
-            Simplify Your Image Workflow
+            Simplify Your Farming Workflow
           </span>
           
           <h1 className="text-4xl md:text-6xl font-bold tracking-tight mb-6 opacity-0 animate-fadeIn animation-delay-200">
@@ -45,8 +45,7 @@ const Index = () => {
           </h1>
           
           <p className="text-lg text-gray-600 max-w-2xl mb-10 text-balance opacity-0 animate-fadeIn animation-delay-500">
-            The intelligent image cropping platform designed for simplicity and precision. 
-            Transform your visuals with just a few clicks.
+          The intelligent agricultural planning platform designed for simplicity and precision. Empower your farming decisions with just a few clicks.
           </p>
           
           <div className="flex flex-col sm:flex-row gap-4 opacity-0 animate-fadeIn animation-delay-700">

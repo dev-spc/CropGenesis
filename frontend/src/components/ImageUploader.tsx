@@ -1,16 +1,18 @@
-import React, { useState, useRef, useCallback } from 'react';
+import React, { useState, useRef } from 'react';
 import { toast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
 import { Image, Upload, Loader2, Check, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
+import axios from 'axios';
 
 interface ImageUploaderProps {
   maxSize?: number; // in MB
   onImageSubmitted?: () => void;
+  setAnalysisResponse?: (response: string) => void;
 }
 
-const ImageUploader: React.FC<ImageUploaderProps> = ({ maxSize = 10, onImageSubmitted }) => {
+const ImageUploader: React.FC<ImageUploaderProps> = ({ maxSize = 10, onImageSubmitted, setAnalysisResponse }) => {
   const [isDragging, setIsDragging] = useState(false);
   const [uploadedImage, setUploadedImage] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
@@ -20,16 +22,16 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({ maxSize = 10, onImageSubm
   const fileInputRef = useRef<HTMLInputElement>(null);
   const navigate = useNavigate();
 
-  const handleDragOver = useCallback((e: React.DragEvent) => {
+  const handleDragOver = (e: React.DragEvent) => {
     e.preventDefault();
     setIsDragging(true);
-  }, []);
+  };
 
-  const handleDragLeave = useCallback(() => {
+  const handleDragLeave = () => {
     setIsDragging(false);
-  }, []);
+  };
 
-  const simulateUpload = useCallback(() => {
+  const simulateUpload = () => {
     setUploading(true);
     setUploadProgress(0);
     
@@ -46,9 +48,9 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({ maxSize = 10, onImageSubm
     }, 150);
     
     return () => clearInterval(interval);
-  }, []);
+  };
 
-  const processImage = useCallback((file: File) => {
+  const processImage = (file: File) => {
     if (file.size > maxSize * 1024 * 1024) {
       setImageError(`File size exceeds ${maxSize}MB limit`);
       toast({
@@ -79,49 +81,81 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({ maxSize = 10, onImageSubm
       }
     };
     reader.readAsDataURL(file);
-  }, [maxSize, simulateUpload]);
+  };
 
-  const handleDrop = useCallback((e: React.DragEvent) => {
+  const handleDrop = (e: React.DragEvent) => {
     e.preventDefault();
     setIsDragging(false);
     
     if (e.dataTransfer.files && e.dataTransfer.files[0]) {
       processImage(e.dataTransfer.files[0]);
     }
-  }, [processImage]);
+  };
 
-  const handleFileChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
       processImage(e.target.files[0]);
     }
-  }, [processImage]);
+  };
 
-  const handleButtonClick = useCallback(() => {
+  const handleButtonClick = () => {
     fileInputRef.current?.click();
-  }, []);
+  };
 
-  const resetUpload = useCallback(() => {
+  const resetUpload = () => {
     setUploadedImage(null);
     setUploading(false);
     setUploadProgress(0);
     setIsProcessed(false);
+    setAnalysisResponse('');
     if (fileInputRef.current) {
       fileInputRef.current.value = '';
     }
-  }, []);
+  };
 
-  const handleSubmit = useCallback(() => {
-    if (onImageSubmitted) {
-      onImageSubmitted();
-    } else {
-      navigate('/features');
+  const handleSubmit = async () => {
+    if (!uploadedImage) return;
+
+    try {
+      setUploading(true);
+
+      const response = await fetch(uploadedImage);
+      const blob = await response.blob();
+      
+      const formData = new FormData();
+      formData.append('file', blob, 'image.jpg');
+      formData.append('image', uploadedImage);
+
+      const result = await axios.post('http://127.0.0.1:8000/plant-disease/', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+      const res = await axios.post('http://127.0.0.1:8000/generate', {
+        prompt: result.data.predicted_disease,
+      });
+      setAnalysisResponse(res.data.response);
+
+      toast({
+        title: "Success",
+        description: "Image uploaded successfully",
+      });
+
+      if (onImageSubmitted) {
+        onImageSubmitted();
+      } else {
+        navigate('/features');
+      }
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to upload image. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setUploading(false);
     }
-    
-    toast({
-      title: "Image submitted",
-      description: "Your image has been submitted for processing",
-    });
-  }, [navigate, onImageSubmitted]);
+  };
 
   return (
     <div className="max-w-2xl w-full mx-auto">
@@ -133,7 +167,7 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({ maxSize = 10, onImageSubm
       >
         {uploadedImage ? (
           <div className="w-full h-full flex flex-col items-center">
-            <div className="relative w-full max-h-80 overflow-hidden rounded-lg mb-4">
+            <div className="relative w-full max-h-80 overflow-hidden rounded-lg mb-4 flex justify-center items-center">
               <img 
                 src={uploadedImage} 
                 alt="Uploaded preview" 

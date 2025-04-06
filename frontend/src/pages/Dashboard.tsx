@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import Navbar from '@/components/Navbar';
 import AnimatedBackground from '@/components/AnimatedBackground';
@@ -12,26 +11,42 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import axios from 'axios';
 
 const Dashboard = () => {
   const [showAnalysisResults, setShowAnalysisResults] = useState(false);
+  const [analysisResponse, setAnalysisResponse] = useState<string | number>('');
+  const [isLoading, setIsLoading] = useState(false);
+  const [cropData, setCropData] = useState({
+    N: 0,
+    P: 0,
+    K: 0,
+    temperature: 0,
+    humidity: 0,
+    ph: 0,
+    rainfall: 0
+  });
   
-  // Sample text output that would be fetched from backend
-  const textOutput = `
-    Image analysis complete.
-    
-    We've detected the following crops in your image:
-    - Wheat (85% confidence)
-    - Barley (12% confidence)
-    - Other (3% confidence)
-    
-    Estimated crop health: Good
-    Recommended actions: Continue current irrigation schedule
-    
-    The analysis is based on vegetation indices and machine learning models 
-    trained on thousands of similar crop images. For more detailed analysis, 
-    please upload images from multiple angles.
-  `;
+  const [yieldData, setYieldData] = useState({
+    latitude: 0,
+    longitude: 0,
+    NDVI: 0,
+    GNDVI: 0,
+    NDWI: 0,
+    SAVI: 0,
+    soil_moisture: 0,
+    temperature: 0,
+    rainfall: 0,
+    crop_type: 0,
+    NDVI_temp: 0,
+    NDVI_rainfall: 0,
+    SAVI_soil_moisture: 0
+  });
+
+  const handleTabChange = () => {
+    setAnalysisResponse('');
+    setShowAnalysisResults(false);
+  };
 
   const indianStates = [
     { value: "AN", label: "Andaman and Nicobar Islands" },
@@ -105,13 +120,55 @@ const Dashboard = () => {
     'Wheat'         // 29
   ];
 
-  const handleFormSubmit = (event: React.FormEvent) => {
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    // Convert the input value to a number, defaulting to 0 if empty
+    const numValue = value === '' ? 0 : parseFloat(value);
+    setCropData(prev => ({
+      ...prev,
+      [name]: numValue
+    }));
+  };
+
+  const handleFormSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
-    // Form submission logic would go here
+    setIsLoading(true);
+    try {
+      const result = await axios.post('http://127.0.0.1:8000/crop-predict/', cropData);
+      setAnalysisResponse(result.data.recommended_crop);
+    } catch (error) {
+      console.error('Error predicting crop:', error);
+      setAnalysisResponse('Error predicting crop. Please try again.');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleImageSubmitted = () => {
     setShowAnalysisResults(true);
+  };
+
+  const handleYieldInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    const numValue = value === '' ? 0 : parseFloat(value);
+    setYieldData(prev => ({
+      ...prev,
+      [name]: numValue
+    }));
+  };
+
+  const handleYieldFormSubmit = async (event: React.FormEvent) => {
+    event.preventDefault();
+    setIsLoading(true);
+    try {
+      const result = await axios.post('http://127.0.0.1:8000/yield-predict/', yieldData);
+      setAnalysisResponse(result.data.predicted_yield);
+    } catch (error) {
+      console.error('Error predicting yield:', error);
+      setAnalysisResponse('Error predicting yield. Please try again.');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -130,7 +187,7 @@ const Dashboard = () => {
           </p>
         </div>
         
-        <Tabs defaultValue="imageManager" className="w-full max-w-4xl mx-auto opacity-0 animate-fadeIn animation-delay-200">
+        <Tabs defaultValue="imageManager" className="w-full max-w-4xl mx-auto opacity-0 animate-fadeIn animation-delay-200" onValueChange={handleTabChange}>
           <TabsList className="grid w-full grid-cols-3">
             <TabsTrigger value="imageManager" className="flex items-center gap-2">
               <Image className="h-4 w-4" />
@@ -161,7 +218,7 @@ const Dashboard = () => {
               </CardHeader>
               <CardContent>
                 <div className="py-4">
-                  <ImageUploader maxSize={5} onImageSubmitted={handleImageSubmitted} />
+                  <ImageUploader setAnalysisResponse={setAnalysisResponse} maxSize={5} onImageSubmitted={handleImageSubmitted} />
                 </div>
                 
                 {showAnalysisResults && (
@@ -169,7 +226,7 @@ const Dashboard = () => {
                     <h3 className="text-lg font-medium mb-4">Analysis Results</h3>
                     <div className="bg-gray-50 p-6 rounded-lg border border-gray-100">
                       <pre className="whitespace-pre-wrap font-mono text-sm bg-white p-4 rounded border border-gray-200">
-                        {textOutput}
+                        {analysisResponse}
                       </pre>
                     </div>
                   </div>
@@ -193,42 +250,113 @@ const Dashboard = () => {
                   <form onSubmit={handleFormSubmit} className="space-y-6">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                       <div className="space-y-3">
-                        <Label htmlFor="cropName">Nitrogen (N)</Label>
-                        <Input id="cropName" type="number"  placeholder="Enter nitrogen amount" />
+                        <Label htmlFor="N">Nitrogen (N)</Label>
+                        <Input 
+                          id="N" 
+                          name="N"
+                          type="number" 
+                          step="0.1"
+                          value={cropData.N}
+                          onChange={handleInputChange}
+                          placeholder="Enter nitrogen amount" 
+                        />
                       </div>
                       <div className="space-y-3">
-                        <Label htmlFor="cropName">Phosphorus (P)</Label>
-                        <Input id="cropName" type="number"  placeholder="Enter phosphorus amount" />
+                        <Label htmlFor="P">Phosphorus (P)</Label>
+                        <Input 
+                          id="P" 
+                          name="P"
+                          type="number" 
+                          step="0.1"
+                          value={cropData.P}
+                          onChange={handleInputChange}
+                          placeholder="Enter phosphorus amount" 
+                        />
                       </div>
                       <div className="space-y-3">
-                        <Label htmlFor="cropName">Potassium (K)</Label>
-                        <Input id="cropName" type="number"  placeholder="Enter potassium amount" />
+                        <Label htmlFor="K">Potassium (K)</Label>
+                        <Input 
+                          id="K" 
+                          name="K"
+                          type="number" 
+                          step="0.1"
+                          value={cropData.K}
+                          onChange={handleInputChange}
+                          placeholder="Enter potassium amount" 
+                        />
                       </div>
                       <div className="space-y-3">
-                        <Label htmlFor="cropName">Temperature</Label>
-                        <Input id="cropName" type="number"  placeholder="Enter temperature" />
+                        <Label htmlFor="temperature">Temperature</Label>
+                        <Input 
+                          id="temperature" 
+                          name="temperature"
+                          type="number" 
+                          step="0.1"
+                          value={cropData.temperature}
+                          onChange={handleInputChange}
+                          placeholder="Enter temperature" 
+                        />
                       </div>
                       <div className="space-y-3">
-                        <Label htmlFor="cropName">Humidity</Label>
-                        <Input id="cropName" type="number"  placeholder="Enter humidity" />
+                        <Label htmlFor="humidity">Humidity</Label>
+                        <Input 
+                          id="humidity" 
+                          name="humidity"
+                          type="number" 
+                          step="0.1"
+                          value={cropData.humidity}
+                          onChange={handleInputChange}
+                          placeholder="Enter humidity" 
+                        />
                       </div>
                       <div className="space-y-3">
-                        <Label htmlFor="cropName">pH</Label>
-                        <Input id="cropName" type="number"  placeholder="Enter pH value" />
+                        <Label htmlFor="ph">pH</Label>
+                        <Input 
+                          id="ph" 
+                          name="ph"
+                          type="number" 
+                          step="0.1"
+                          value={cropData.ph}
+                          onChange={handleInputChange}
+                          placeholder="Enter pH value" 
+                        />
                       </div>
                       <div className="space-y-3">
-                        <Label htmlFor="cropName">Rainfall</Label>
-                        <Input id="cropName" type="number"  placeholder="Enter rainfall amount" />
+                        <Label htmlFor="rainfall">Rainfall</Label>
+                        <Input 
+                          id="rainfall" 
+                          name="rainfall"
+                          type="number" 
+                          step="0.1"
+                          value={cropData.rainfall}
+                          onChange={handleInputChange}
+                          placeholder="Enter rainfall amount" 
+                        />
                       </div>
                     </div>
                     
                     <div className="flex justify-end">
-                      <Button type="submit" className="mt-4 bg-google-blue hover:bg-google-blue/90 text-white">
-                        Submit
+                      <Button 
+                        type="submit" 
+                        className="mt-4 bg-google-blue hover:bg-google-blue/90 text-white"
+                        disabled={isLoading}
+                        onClick={()=>setShowAnalysisResults(true)}
+                      >
+                        {isLoading ? 'Predicting...' : 'Submit'}
                       </Button>
                     </div>
                   </form>
                 </div>
+                {showAnalysisResults && (
+                  <div className="mt-6">
+                    <h3 className="text-lg font-medium mb-4">Analysis Results</h3>
+                    <div className="bg-gray-50 p-6 rounded-lg border border-gray-100">
+                      <pre className="whitespace-pre-wrap font-mono text-sm bg-white p-4 rounded border border-gray-200">
+                        Recommended crop: {analysisResponse}
+                      </pre>
+                    </div>
+                  </div>
+                )}
               </CardContent>
             </Card>
           </TabsContent>
@@ -240,96 +368,207 @@ const Dashboard = () => {
                 <div className="flex justify-between items-center">
                   <div>
                     <CardTitle>Predict the Yield</CardTitle>
-                    <CardDescription>Configure crop for the yield</CardDescription>
+                    <CardDescription>Configure parameters for yield prediction</CardDescription>
                   </div>
                 </div>
               </CardHeader>
               <CardContent>
                 <div className="py-4">
-                  <form onSubmit={handleFormSubmit} className="space-y-6">
+                  <form onSubmit={handleYieldFormSubmit} className="space-y-6">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                       <div className="space-y-3">
-                        <Label htmlFor="notificationPreference">States</Label>
-                        <Select>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Select state" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {indianStates.map((item, index)=><SelectItem key={index} value={item.value}>{item.label}</SelectItem>)}
-                          </SelectContent>
-                        </Select>
+                        <Label htmlFor="latitude">Latitude</Label>
+                        <Input 
+                          id="latitude" 
+                          name="latitude"
+                          type="number" 
+                          step="0.0001"
+                          value={yieldData.latitude}
+                          onChange={handleYieldInputChange}
+                          placeholder="Enter latitude" 
+                        />
                       </div>
-                      
+
                       <div className="space-y-3">
-                        <Label htmlFor="analysisFrequency">Crop Type</Label>
-                        <Select>
+                        <Label htmlFor="longitude">Longitude</Label>
+                        <Input 
+                          id="longitude" 
+                          name="longitude"
+                          type="number" 
+                          step="0.0001"
+                          value={yieldData.longitude}
+                          onChange={handleYieldInputChange}
+                          placeholder="Enter longitude" 
+                        />
+                      </div>
+
+                      <div className="space-y-3">
+                        <Label htmlFor="NDVI">NDVI</Label>
+                        <Input 
+                          id="NDVI" 
+                          name="NDVI"
+                          type="number" 
+                          step="0.01"
+                          value={yieldData.NDVI}
+                          onChange={handleYieldInputChange}
+                          placeholder="Enter NDVI value" 
+                        />
+                      </div>
+
+                      <div className="space-y-3">
+                        <Label htmlFor="GNDVI">GNDVI</Label>
+                        <Input 
+                          id="GNDVI" 
+                          name="GNDVI"
+                          type="number" 
+                          step="0.01"
+                          value={yieldData.GNDVI}
+                          onChange={handleYieldInputChange}
+                          placeholder="Enter GNDVI value" 
+                        />
+                      </div>
+
+                      <div className="space-y-3">
+                        <Label htmlFor="NDWI">NDWI</Label>
+                        <Input 
+                          id="NDWI" 
+                          name="NDWI"
+                          type="number" 
+                          step="0.01"
+                          value={yieldData.NDWI}
+                          onChange={handleYieldInputChange}
+                          placeholder="Enter NDWI value" 
+                        />
+                      </div>
+
+                      <div className="space-y-3">
+                        <Label htmlFor="SAVI">SAVI</Label>
+                        <Input 
+                          id="SAVI" 
+                          name="SAVI"
+                          type="number" 
+                          step="0.01"
+                          value={yieldData.SAVI}
+                          onChange={handleYieldInputChange}
+                          placeholder="Enter SAVI value" 
+                        />
+                      </div>
+
+                      <div className="space-y-3">
+                        <Label htmlFor="soil_moisture">Soil Moisture</Label>
+                        <Input 
+                          id="soil_moisture" 
+                          name="soil_moisture"
+                          type="number" 
+                          step="0.1"
+                          value={yieldData.soil_moisture}
+                          onChange={handleYieldInputChange}
+                          placeholder="Enter soil moisture" 
+                        />
+                      </div>
+
+                      <div className="space-y-3">
+                        <Label htmlFor="temperature">Temperature</Label>
+                        <Input 
+                          id="temperature" 
+                          name="temperature"
+                          type="number" 
+                          step="0.1"
+                          value={yieldData.temperature}
+                          onChange={handleYieldInputChange}
+                          placeholder="Enter temperature" 
+                        />
+                      </div>
+
+                      <div className="space-y-3">
+                        <Label htmlFor="rainfall">Rainfall</Label>
+                        <Input 
+                          id="rainfall" 
+                          name="rainfall"
+                          type="number" 
+                          step="0.1"
+                          value={yieldData.rainfall}
+                          onChange={handleYieldInputChange}
+                          placeholder="Enter rainfall" 
+                        />
+                      </div>
+
+                      <div className="space-y-3">
+                        <Label htmlFor="crop_type">Crop Type</Label>
+                        <Select onValueChange={(value) => setYieldData(prev => ({ ...prev, crop_type: parseInt(value) }))}>
                           <SelectTrigger>
                             <SelectValue placeholder="Select crop type" />
                           </SelectTrigger>
                           <SelectContent>
-                            <SelectItem value="rabi">Rabi</SelectItem>
-                            <SelectItem value="kharif">Kharif</SelectItem>
-                            <SelectItem value="zaid">Zaid</SelectItem>
+                            {crops.map((item, index) => (
+                              <SelectItem key={index} value={index.toString()}>{item}</SelectItem>
+                            ))}
                           </SelectContent>
                         </Select>
                       </div>
 
                       <div className="space-y-3">
-                        <Label htmlFor="states">Crops</Label>
-                        <Select>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Select crop" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {crops.map((item, index)=><SelectItem key={index} value={item}>{item}</SelectItem>)}
-                          </SelectContent>
-                        </Select>
+                        <Label htmlFor="NDVI_temp">NDVI Temperature</Label>
+                        <Input 
+                          id="NDVI_temp" 
+                          name="NDVI_temp"
+                          type="number" 
+                          step="0.01"
+                          value={yieldData.NDVI_temp}
+                          onChange={handleYieldInputChange}
+                          placeholder="Enter NDVI temperature" 
+                        />
                       </div>
 
                       <div className="space-y-3">
-                        <Label htmlFor="cropName">Nitrogen (N)</Label>
-                        <Input id="cropName" type="number"  placeholder="Enter nitrogen amount" />
+                        <Label htmlFor="NDVI_rainfall">NDVI Rainfall</Label>
+                        <Input 
+                          id="NDVI_rainfall" 
+                          name="NDVI_rainfall"
+                          type="number" 
+                          step="0.01"
+                          value={yieldData.NDVI_rainfall}
+                          onChange={handleYieldInputChange}
+                          placeholder="Enter NDVI rainfall" 
+                        />
                       </div>
 
                       <div className="space-y-3">
-                        <Label htmlFor="cropName">Phosphorus (P)</Label>
-                        <Input id="cropName" type="number"  placeholder="Enter phosphorus amount" />
+                        <Label htmlFor="SAVI_soil_moisture">SAVI Soil Moisture</Label>
+                        <Input 
+                          id="SAVI_soil_moisture" 
+                          name="SAVI_soil_moisture"
+                          type="number" 
+                          step="0.01"
+                          value={yieldData.SAVI_soil_moisture}
+                          onChange={handleYieldInputChange}
+                          placeholder="Enter SAVI soil moisture" 
+                        />
                       </div>
-
-                      <div className="space-y-3">
-                        <Label htmlFor="cropName">Potassium (K)</Label>
-                        <Input id="cropName" type="number"  placeholder="Enter potassium amount" />
-                      </div>
-
-                      <div className="space-y-3">
-                        <Label htmlFor="cropName">Temperature</Label>
-                        <Input id="cropName" type="number"  placeholder="Enter temperature" />
-                      </div>
-                      
-                      <div className="space-y-3">
-                        <Label htmlFor="cropName">pH</Label>
-                        <Input id="cropName" type="number"  placeholder="Enter pH value" />
-                      </div>
-
-                      <div className="space-y-3">
-                        <Label htmlFor="cropName">Rainfall</Label>
-                        <Input id="cropName" type="number"  placeholder="Enter rainfall amount" />
-                      </div>
-
-                      <div className="space-y-3">
-                        <Label htmlFor="area">Area (in hectare)</Label>
-                        <Input id="area" type="number"  placeholder="Enter area" />
-                      </div>
-
                     </div>
                     
                     <div className="flex justify-end">
-                      <Button type="submit" className="mt-4 bg-google-blue hover:bg-google-blue/90 text-white">
-                        Submit
+                      <Button 
+                        type="submit" 
+                        className="mt-4 bg-google-blue hover:bg-google-blue/90 text-white"
+                        disabled={isLoading}
+                        onClick={()=>setShowAnalysisResults(true)}
+                      >
+                        {isLoading ? 'Predicting...' : 'Submit'}
                       </Button>
                     </div>
                   </form>
                 </div>
+                {showAnalysisResults && (
+                  <div className="mt-6">
+                    <h3 className="text-lg font-medium mb-4">Analysis Results</h3>
+                    <div className="bg-gray-50 p-6 rounded-lg border border-gray-100">
+                      <pre className="whitespace-pre-wrap font-mono text-sm bg-white p-4 rounded border border-gray-200">
+                        Predicted yield: {analysisResponse}
+                      </pre>
+                    </div>
+                  </div>
+                )}
               </CardContent>
             </Card>
           </TabsContent>
