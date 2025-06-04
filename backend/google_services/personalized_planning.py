@@ -220,7 +220,7 @@ Please rewrite it as described above.
     return audio_file
 
 if __name__ == "__main__":
-    image_path = "RiceFieldClip1.mp4"
+    image_path = "RiceFieldClip.mp4"
     farmer_inputs = {
     "location": "Punjab, India",
     "field_photo": "Attached",
