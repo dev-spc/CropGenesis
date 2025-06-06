@@ -5,7 +5,12 @@ import asyncio
 from google.genai import types, Client
 import wave
 import os
+from dotenv import load_dotenv
 import cv2
+
+load_dotenv()
+
+GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
 
 
 def wave_file(filename, pcm, channels=1, rate=24000, sample_width=2):
@@ -33,7 +38,7 @@ def extract_frames(video_path, num_frames=5):
 
 
 # Configure your Gemini API Key
-genai.configure(api_key="AIzaSyAaH_jhIhBisCEDSaMSSZlTX7cvPTV_GrU")
+genai.configure(api_key=GEMINI_API_KEY)
 config = types.LiveConnectConfig(response_modalities=["AUDIO"])
 
 
