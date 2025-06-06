@@ -36,7 +36,7 @@ translator = Translator()
 
 # Gemini Vision Model
 model_audio = "gemini-2.5-flash-preview-native-audio-dialog"
-client = Client(api_key="AIzaSyAaH_jhIhBisCEDSaMSSZlTX7cvPTV_GrU")
+client = Client(api_key=GEMINI_API_KEY)
 
 async def detect_plant_disease(image_path, lang, user_prompt="Here is the photo of a leaf. Idenitfy the disease if any."):
     image_extensions = ['.jpg', '.jpeg', '.png', '.bmp', '.tiff', '.gif']

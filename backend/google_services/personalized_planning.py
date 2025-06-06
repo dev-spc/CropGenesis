@@ -47,7 +47,7 @@ translator = Translator()
 
 # Gemini Vision Model
 model_audio = "gemini-2.5-flash-preview-native-audio-dialog"
-client = Client(api_key="AIzaSyAaH_jhIhBisCEDSaMSSZlTX7cvPTV_GrU")
+client = Client(api_key=GEMINI_API_KEY)
 
 
 async def agriculure_planning(farmer_prompt, image_path, lang):
@@ -61,7 +61,7 @@ async def agriculure_planning(farmer_prompt, image_path, lang):
 
     # Your detailed prompt
     full_prompt = f'''
-    Language: {lang}
+    Answer in {lang} language.
 You are an intelligent agricultural assistant. Based on the following user inputs from a farmer, generate a well-structured, personalized farming plan that maximizes profit while respecting the farmer's constraints and preferences.
 
 🧩 Step 1: Required Inputs
