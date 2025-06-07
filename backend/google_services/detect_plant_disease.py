@@ -12,7 +12,6 @@ load_dotenv()
 
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
 
-# Configure your Gemini API Key
 genai.configure(api_key=GEMINI_API_KEY)
 config = types.LiveConnectConfig(response_modalities=["AUDIO"])
 
@@ -31,10 +30,8 @@ def extract_frames(video_path, num_frames=5):
     cap.release()
     return frames
 
-# Translator instance
 translator = Translator()
 
-# Gemini Vision Model
 model_audio = "gemini-2.5-flash-preview-native-audio-dialog"
 client = Client(api_key=GEMINI_API_KEY)
 
@@ -48,7 +45,7 @@ async def detect_plant_disease(image_path, lang, user_prompt="Here is the photo 
         images = extract_frames(image_path)
     
     full_prompt = f"""
-    Language: {lang}
+    Answer in {lang} language.
 You are an expert in plant pathology. Analyze the plant leaf image and answer:
 - What disease (if any) is affecting the plant?
 - What are the symptoms and causes?
@@ -58,19 +55,12 @@ User says: '{user_prompt}'
     """
 
     response = client.models.generate_content(
-      model="gemini-2.5-pro-preview-05-06",  # Use a model you have access to (list with client.models.list())
+      model="gemini-2.5-flash-preview-05-20",
       contents=[full_prompt, images],
    )
 
-    english_text = response.text
-    english_text = english_text.replace("*", "")
-
-    # Translate response
-    if lang != "en":
-        translated = await translator.translate(english_text, dest=lang)
-        output_text = translated.text
-    else:
-        output_text = english_text
+    output_text = response.text
+    output_text = output_text.replace("*", "")
 
     return output_text
 
@@ -105,9 +95,6 @@ Please rewrite it as described above.
             if response.data is not None:
                 wf.writeframes(response.data)
 
-            # Un-comment this code to print audio data info
-            # if response.server_content.model_turn is not None:
-            #      print(response.server_content.model_turn.parts[0].inline_data.mime_type)
 
         wf.close()
         return audio_file

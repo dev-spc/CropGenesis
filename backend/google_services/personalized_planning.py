@@ -11,7 +11,7 @@ import cv2
 load_dotenv()
 
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
-
+CHAT_SESSION = None
 
 def wave_file(filename, pcm, channels=1, rate=24000, sample_width=2):
    with wave.open(filename, "wb") as wf:
@@ -37,20 +37,18 @@ def extract_frames(video_path, num_frames=5):
     return frames
 
 
-# Configure your Gemini API Key
 genai.configure(api_key=GEMINI_API_KEY)
 config = types.LiveConnectConfig(response_modalities=["AUDIO"])
 
 
-# Translator instance
 translator = Translator()
 
-# Gemini Vision Model
 model_audio = "gemini-2.5-flash-preview-native-audio-dialog"
 client = Client(api_key=GEMINI_API_KEY)
 
 
 async def agriculure_planning(farmer_prompt, image_path, lang):
+    global CHAT_SESSION
     image_extensions = ['.jpg', '.jpeg', '.png', '.bmp', '.tiff', '.gif']
     video_extensions = ['.mp4', '.avi', '.mov', '.mkv', '.flv', '.wmv']
     ext = os.path.splitext(image_path)[1].lower()
@@ -59,7 +57,6 @@ async def agriculure_planning(farmer_prompt, image_path, lang):
     elif ext in video_extensions:
         images = extract_frames(image_path)
 
-    # Your detailed prompt
     full_prompt = f'''
     Answer in {lang} language.
 You are an intelligent agricultural assistant. Based on the following user inputs from a farmer, generate a well-structured, personalized farming plan that maximizes profit while respecting the farmer's constraints and preferences.
@@ -177,7 +174,11 @@ Here are the detailes provided by the farmers: {farmer_prompt}
     english_text = response.text
     english_text = english_text.replace("*", "")
     output_text = english_text
-    # Translate response
+    CHAT_SESSION = client.chats.create(model="gemini-2.5-flash-preview-05-20")
+    CHAT_SESSION.send_message(
+        f"You are an expert agricultural assistant. Here is the farming plan:\n\n{output_text}\n\n"
+        "Use this plan to answer any questions. If you cant find answers than google search it."
+    )
 
     return output_text
 
@@ -218,11 +219,14 @@ Please rewrite it as described above.
         )
     )
     data = response.candidates[0].content.parts[0].inline_data.data
-
-# Play audio directly
     audio_file = "audio_personalized_planning.wav"
     wave_file(audio_file, data)
     return audio_file
+
+def ask_about_plan(user_question):
+    global CHAT_SESSION
+    response = CHAT_SESSION.send_message(user_question)
+    return response.text.strip()
 
 if __name__ == "__main__":
     image_path = "RiceFieldClip.mp4"
@@ -248,4 +252,13 @@ if __name__ == "__main__":
     if(audio_pref=='y'):
         audio_path = asyncio.run(audio_explanation_planning(result_text))
         print(f"\n🔊 Voice file saved at: {audio_path}")
+
+    print("\n=== Chatbot: Ask your doubts about the plan! (Type 'exit' to quit) ===\n")
+    while(True):
+        user_input = input("\nUser: ")
+        if(user_input.lower() in ['exit', 'quit']):
+            print("Chatbot: Goodbye!")
+            break
+        chatbot_response = ask_about_plan(user_input)
+        print("Chatbot:", chatbot_response)
     
