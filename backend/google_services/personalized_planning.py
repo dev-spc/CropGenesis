@@ -7,10 +7,15 @@ import wave
 import tempfile
 import os
 import io
+from dotenv import load_dotenv
 import cv2
 from google.genai.types import GenerateContentConfig
 
 
+load_dotenv()
+
+GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
+CHAT_SESSION = None
 
 def wave_file(filename, pcm, channels=1, rate=24000, sample_width=2):
     """Save PCM audio data to a .wav file."""
@@ -103,7 +108,7 @@ async def agriculure_planning(
 
     # Base prompt for farming plan
     full_prompt = f'''
-    Language: {lang}
+    Answer in {lang} language.
 You are an intelligent agricultural assistant. Based on the following user inputs from a farmer, generate a well-structured, personalized farming plan that maximizes profit while respecting the farmer's constraints and preferences.
 
 🧩 Step 1: Required Inputs
@@ -216,11 +221,17 @@ Most importantly provide the complete info in the form of html code which can be
 
     # Call Gemini API for content generation
     response = client.models.generate_content(
-        model="gemini-2.5-flash-preview-05-20",
-        contents=[full_prompt, *pil_images, frame]
+      model="gemini-2.5-flash-preview-05-20",  # Use a model you have access to (list with client.models.list())
+      contents=[full_prompt, *pil_images, frame]
+   )
+    english_text = response.text
+    english_text = english_text.replace("*", "")
+    output_text = english_text
+    CHAT_SESSION = client.chats.create(model="gemini-2.5-flash-preview-05-20")
+    CHAT_SESSION.send_message(
+        f"You are an expert agricultural assistant. Here is the farming plan:\n\n{output_text}\n\n"
+        "Use this plan to answer any questions. If you cant find answers than google search it."
     )
-
-    output_text = response.text
 
     return output_text
 
@@ -265,8 +276,46 @@ Please rewrite it as described above.
         )
     )
     data = response.candidates[0].content.parts[0].inline_data.data
-
-    # Play audio directly
     audio_file = "audio_personalized_planning.wav"
     wave_file(audio_file, data)
     return audio_file
+
+def ask_about_plan(user_question):
+    global CHAT_SESSION
+    response = CHAT_SESSION.send_message(user_question)
+    return response.text.strip()
+
+# if __name__ == "__main__":
+#     image_path = "RiceFieldClip.mp4"
+#     farmer_inputs = {
+#     "location": "Punjab, India",
+#     "field_photo": "Attached",
+#     "last_crop": "Wheat",
+#     "land_size": "1–3 acres",
+#     "budget": "Medium",
+#     "preference": "Max Profit",
+#     "irrigation": "Borewell",
+#     "weather_tolerance": "Okay with some risk",
+#     "machinery": "Tractor",
+#     "labor": "Easy",
+#     "openness": "Open to suggestions",
+#     "crop_type": "Cereal",
+# }
+#     lang = "English"
+#     result_text = asyncio.run(agriculure_planning(farmer_inputs, image_path, lang))
+#     print("\n=== Product Info & Usage ===\n")
+#     print(result_text)
+#     audio_pref = input("Do you want explanation in audio format? (y/n) ")
+#     if(audio_pref=='y'):
+#         audio_path = asyncio.run(audio_explanation_planning(result_text))
+#         print(f"\n🔊 Voice file saved at: {audio_path}")
+
+#     print("\n=== Chatbot: Ask your doubts about the plan! (Type 'exit' to quit) ===\n")
+#     while(True):
+#         user_input = input("\nUser: ")
+#         if(user_input.lower() in ['exit', 'quit']):
+#             print("Chatbot: Goodbye!")
+#             break
+#         chatbot_response = ask_about_plan(user_input)
+#         print("Chatbot:", chatbot_response)
+    
