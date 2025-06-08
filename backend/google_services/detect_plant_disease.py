@@ -7,6 +7,7 @@ import wave
 import os
 from dotenv import load_dotenv
 import cv2
+import subprocess
 
 load_dotenv()
 
@@ -65,10 +66,11 @@ User says: '{user_prompt}'
     return output_text
 
 async def audio_explanation_disease(text):
-    audio_file = "audio_plant_disease.wav"
+    audio_file_wav = "audio_plant_disease.wav"
+    audio_file_mp4 = "audio_plant_disease.mp4"
     async with client.aio.live.connect(model=model_audio, config=config) as session:
         
-        wf = wave.open(audio_file, "wb")
+        wf = wave.open(audio_file_wav, "wb")
         wf.setnchannels(1)
         wf.setsampwidth(2)
         wf.setframerate(24000)
@@ -95,9 +97,9 @@ Please rewrite it as described above.
             if response.data is not None:
                 wf.writeframes(response.data)
 
-
         wf.close()
-        return audio_file
+        subprocess.run(['ffmpeg', '-y', '-i', audio_file_wav, audio_file_mp4])
+        return audio_file_mp4
 
 if __name__ == "__main__":
     image_path = "leave-with-fungus.jpg"

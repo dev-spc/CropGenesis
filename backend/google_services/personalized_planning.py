@@ -10,7 +10,7 @@ import io
 from dotenv import load_dotenv
 import cv2
 from google.genai.types import GenerateContentConfig
-
+import subprocess
 
 load_dotenv()
 
@@ -66,17 +66,8 @@ async def extract_frames(video_file, num_frames=5):
         return []
 
 
-
-
-
-genai.configure(api_key="")
-config = types.LiveConnectConfig(response_modalities=["AUDIO"])
-
-# Translator instance
-translator = Translator()
-
-model_audio = "gemini-2.5-flash-preview-native-audio-dialog"
-client = Client(api_key="")
+genai.configure(api_key=GEMINI_API_KEY)
+client = Client(api_key=GEMINI_API_KEY)
 
 
 async def agriculure_planning(
@@ -96,11 +87,11 @@ async def agriculure_planning(
     """
     pil_images = []
     frame = ''
-
-    for img in images:
-        img_bytes = await img.read()
-        pil_image = Image.open(io.BytesIO(img_bytes))
-        pil_images.append(pil_image)
+    if(images):
+        for img in images:
+            img_bytes = await img.read()
+            pil_image = Image.open(io.BytesIO(img_bytes))
+            pil_images.append(pil_image)
     
     if video:
         frame = await extract_frames(video)
@@ -276,17 +267,31 @@ Please rewrite it as described above.
         )
     )
     data = response.candidates[0].content.parts[0].inline_data.data
-    audio_file = "audio_personalized_planning.wav"
-    wave_file(audio_file, data)
-    return audio_file
+    audio_file_wav = "audio_personalized_planning.wav"
+    audio_file_mp4 = "audio_personalized_planning.mp4"
+    
+    wave_file(audio_file_wav, data)
+    subprocess.run(['ffmpeg', '-y', '-i', audio_file_wav, audio_file_mp4])
+    return audio_file_mp4
 
 def ask_about_plan(user_question):
     global CHAT_SESSION
     response = CHAT_SESSION.send_message(user_question)
     return response.text.strip()
 
+# class MockUploadFile:
+#     def __init__(self, filepath):
+#         self.filename = os.path.basename(filepath)
+#         self.filepath = filepath
+
+#     async def read(self):
+#         with open(self.filepath, "rb") as f:
+#             return f.read()
+
+
 # if __name__ == "__main__":
 #     image_path = "RiceFieldClip.mp4"
+
 #     farmer_inputs = {
 #     "location": "Punjab, India",
 #     "field_photo": "Attached",
@@ -301,8 +306,17 @@ def ask_about_plan(user_question):
 #     "openness": "Open to suggestions",
 #     "crop_type": "Cereal",
 # }
+#     location = "Punjab, India"
 #     lang = "English"
-#     result_text = asyncio.run(agriculure_planning(farmer_inputs, image_path, lang))
+#     land_size = "1-3 acres"
+#     last_crop = "Wheat"
+#     irrigation = "Borewell"
+#     season = "Kharif"
+#     description = "Field with loamy soil, moderate fertility, and good drainage."
+#     video_path = "RiceFieldClip.mp4"
+#     video_file = MockUploadFile(video_path)
+#     lang = "English"
+#     result_text = asyncio.run(agriculure_planning(location, land_size, last_crop, irrigation, season, description, video=None, lang=lang))
 #     print("\n=== Product Info & Usage ===\n")
 #     print(result_text)
 #     audio_pref = input("Do you want explanation in audio format? (y/n) ")
