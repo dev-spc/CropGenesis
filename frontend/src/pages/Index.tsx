@@ -5,7 +5,8 @@ import { ArrowRight, Crop, Image, Zap } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import AnimatedBackground from '@/components/AnimatedBackground';
 import Navbar from '@/components/Navbar';
-import farm from '/public/farm.png'
+import farm from '/farm.png'
+import { CropPrice } from '@/components/CropPrice';
 
 const Index = () => {
   const navigate = useNavigate();
@@ -32,7 +33,7 @@ const Index = () => {
     <div className="min-h-screen w-full overflow-hidden">
       <AnimatedBackground />
       <Navbar />
-      
+      {/* <CropPrice/> */}
       <main className="pt-32 px-6 max-w-7xl mx-auto">
         {/* Hero Section */}
         <section className="flex flex-col items-center text-center mb-24">
@@ -59,11 +60,12 @@ const Index = () => {
               <ArrowRight size={16} />
             </Button>
             <Button 
+            onClick={()=> navigate('/plan')}
               variant="outline" 
               size="lg" 
-              className="border-gray-200 hover:bg-gray-50 rounded-full"
+              className="border-gray-200 hover:bg-gray-50 rounded-full cursor-pointer"
             >
-              Learn More
+              Plan a crop
             </Button>
           </div>
           

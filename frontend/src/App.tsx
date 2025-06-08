@@ -6,6 +6,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Index from "./pages/Index";
 import Dashboard from "./pages/Dashboard";
 import NotFound from "./pages/NotFound";
+import Plan from "./pages/Plan";
 
 const App = () => (
     <TooltipProvider>
@@ -15,6 +16,7 @@ const App = () => (
         <Routes>
           <Route path="/" element={<Index />} />
           <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/plan" element={<Plan />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>

@@ -1,4 +1,4 @@
-from fastapi import FastAPI, UploadFile, File
+from fastapi import FastAPI, UploadFile, File, Form
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from services.model_loader import predict_crop
@@ -7,10 +7,15 @@ from services.scaler_model_loader import normalize_features
 from services.plant_disease_model_loader import predict_disease
 import google.generativeai as genai
 from dotenv import load_dotenv
+from google_services.personalized_planning import agriculure_planning, audio_explanation_planning
+from typing import List, Annotated, Optional
+from fastapi.responses import FileResponse
+import asyncio
 import os
 
 # Load environment variables
 load_dotenv()
+
 
 app = FastAPI()
 
@@ -72,6 +77,7 @@ class YieldFeatures(BaseModel):
     NDVI_rainfall: float
     SAVI_soil_moisture: float
 
+
 @app.post("/crop-predict/")
 async def predict(features: CropFeatures):
     """API endpoint to predict the recommended crop."""
@@ -85,6 +91,35 @@ async def predict(features: CropFeatures):
         return {"recommended_crop": str(prediction)}  # Ensure response is JSON serializable
     except Exception as e:
         return {"error": str(e)}  # Return error details for debugging
+    
+
+    
+@app.post("/plan-predict/")
+async def predict_plan(location: Annotated[str, Form()], land_size: Annotated[str, Form()], last_crop: Annotated[str, Form()], irrigation: Annotated[str, Form()], season: Annotated[str, Form()], description: Annotated[Optional[str], Form()] = None,images: List[UploadFile] = File(default=[]), video: Optional[UploadFile] = File(None)):
+    try:
+        prediction = await agriculure_planning(location, land_size, last_crop, irrigation, season, description, images, video)
+        return {"code": str(prediction)} 
+    except Exception as e:
+        return {"error": str(e)} 
+    
+
+@app.post("/get-audio/")
+async def get_audio(text: Annotated[str, Form()]):
+    try: 
+        prediction = await audio_explanation_planning(text)
+        return {"name": prediction} 
+    except Exception as e:
+        return {"error": str(e)} 
+    
+
+@app.get("/audio/{filename}")
+def get_audio(filename: str):
+    file_path = f"{filename}"
+    if os.path.exists(file_path):
+        return FileResponse(file_path, media_type="audio/mpeg")
+    return {"error": "File not found"}
+
+
 
 @app.post("/yield-predict/")
 async def predict_yield_model(features: YieldFeatures):

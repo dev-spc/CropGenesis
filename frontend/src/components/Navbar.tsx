@@ -3,6 +3,8 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import Logo from './Logo';
 import { Button } from "@/components/ui/button";
 import { Menu, X } from 'lucide-react';
+import { CropPrice } from './CropPrice';
+import '../App.css'
 
 const Navbar: React.FC = () => {
   const [scrolled, setScrolled] = useState(false);
@@ -26,7 +28,7 @@ const Navbar: React.FC = () => {
   
   return (
     <header 
-      className={`fixed top-0 left-0 right-0 z-50 py-4 px-6 md:px-10 transition-all duration-300 ${
+      className={`fixed bg-white top-0 left-0 right-0 z-50 py-4 space-y-2 transition-all duration-300 ${
         scrolled ? 'bg-white/80 backdrop-blur-md shadow-sm' : 'bg-transparent'
       }`}
     >
@@ -54,9 +56,9 @@ const Navbar: React.FC = () => {
           ))}
           <Button 
             className="bg-google-blue hover:bg-google-blue/90 text-white rounded-full px-6"
-            onClick={() => navigate('/dashboard')}
+            onClick={() => navigate('/plan')}
           >
-            Try Now
+            Get a Plan
           </Button>
         </nav>
         
@@ -103,6 +105,7 @@ const Navbar: React.FC = () => {
           </div>
         </div>
       )}
+      <CropPrice/>
     </header>
   );
 };
