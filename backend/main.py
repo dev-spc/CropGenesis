@@ -7,10 +7,9 @@ from services.scaler_model_loader import normalize_features
 from services.plant_disease_model_loader import predict_disease
 import google.generativeai as genai
 from dotenv import load_dotenv
-from google_services.personalized_planning import agriculure_planning, audio_explanation_planning
+from google_services.personalized_planning import agriculure_planning, audio_explanation_planning, ask_about_plan
 from typing import List, Annotated, Optional
 from fastapi.responses import FileResponse
-import asyncio
 import os
 
 # Load environment variables
@@ -120,6 +119,12 @@ def get_audio(filename: str):
     return {"error": "File not found"}
 
 
+@app.post("/ask-about-plan/")
+async def ask_about_plan_api(text: str):
+    response = await ask_about_plan(text)
+    return {"response": response}
+
+
 
 @app.post("/yield-predict/")
 async def predict_yield_model(features: YieldFeatures):
@@ -141,12 +146,15 @@ async def predict_yield_model(features: YieldFeatures):
     
     except Exception as e:
         return {"error": str(e)}
+    
 
 @app.post("/plant-disease/")
 async def predict_plant_disease(file: UploadFile = File(...)):
         image_bytes = await file.read()
         prediction = predict_disease(image_bytes)
         return {"predicted_disease": prediction}
+
+
 
 
 if __name__ == "__main__":
