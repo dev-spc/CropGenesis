@@ -1,13 +1,15 @@
 from PIL import Image
 import google.generativeai as genai
-from googletrans import Translator
-import asyncio
 from google.genai import types, Client
+import asyncio
 import wave
+import tempfile
 import os
+import io
 from dotenv import load_dotenv
 import cv2
-import subprocess
+from google.genai.types import GenerateContentConfig
+from moviepy import AudioFileClip, ColorClip, CompositeVideoClip
 
 load_dotenv()
 
@@ -31,7 +33,6 @@ def extract_frames(video_path, num_frames=5):
     cap.release()
     return frames
 
-translator = Translator()
 
 model_audio = "gemini-2.5-flash-preview-native-audio-dialog"
 client = Client(api_key=GEMINI_API_KEY)
@@ -98,7 +99,12 @@ Please rewrite it as described above.
                 wf.writeframes(response.data)
 
         wf.close()
-        subprocess.run(['ffmpeg', '-y', '-i', audio_file_wav, audio_file_mp4])
+        audio_clip = AudioFileClip(audio_file_wav)
+        duration = audio_clip.duration
+        video_clip = ColorClip(size=(640, 480), color=(0, 0, 0), duration=duration)
+        video_clip = video_clip.with_fps(24)
+        final_clip = video_clip.with_audio(audio_clip)
+        final_clip.write_videofile(audio_file_mp4, codec="libx264", audio_codec="aac")
         return audio_file_mp4
 
 if __name__ == "__main__":

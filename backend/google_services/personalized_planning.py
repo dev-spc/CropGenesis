@@ -1,7 +1,6 @@
 from PIL import Image
 import google.generativeai as genai
 from google.genai import types, Client
-from googletrans import Translator
 import asyncio
 import wave
 import tempfile
@@ -10,7 +9,7 @@ import io
 from dotenv import load_dotenv
 import cv2
 from google.genai.types import GenerateContentConfig
-import subprocess
+from moviepy import AudioFileClip, ColorClip, CompositeVideoClip
 
 load_dotenv()
 
@@ -271,7 +270,13 @@ Please rewrite it as described above.
     audio_file_mp4 = "audio_personalized_planning.mp4"
     
     wave_file(audio_file_wav, data)
-    subprocess.run(['ffmpeg', '-y', '-i', audio_file_wav, audio_file_mp4])
+    
+    audio_clip = AudioFileClip(audio_file_wav)
+    duration = audio_clip.duration
+    video_clip = ColorClip(size=(640, 480), color=(0, 0, 0), duration=duration)
+    video_clip = video_clip.with_fps(24)
+    final_clip = video_clip.with_audio(audio_clip)
+    final_clip.write_videofile(audio_file_mp4, codec="libx264", audio_codec="aac")
     return audio_file_mp4
 
 def ask_about_plan(user_question):
