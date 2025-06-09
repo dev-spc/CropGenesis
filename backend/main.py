@@ -10,8 +10,12 @@ from dotenv import load_dotenv
 from google_services.personalized_planning import agriculure_planning, audio_explanation_planning, ask_about_plan
 from typing import List, Annotated, Optional
 from fastapi.responses import FileResponse
+from fastapi import HTTPException
 import os
-
+from google_services.detect_plant_disease import plant_analysis_func
+from google_services.general_chatbot import GeminiChatbot
+import httpx
+import urllib.parse
 # Load environment variables
 load_dotenv()
 
@@ -20,7 +24,7 @@ app = FastAPI()
 
 # Configure the API key
 genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
-
+PRICE_API_KEY=os.getenv("PRICE_API_KEY")
 def generate_text(prompt: str, systemId: int):
     if(systemId==1):
         system_prompt = "You are an agricultural expert—given a crop and its disease, write 80–100 words with a short intro, 3 spaced bullet points (identification, control, crop management), and a brief conclusion—no asterisks, keep it professional and concise. No styling like bolds or italics."
@@ -94,13 +98,27 @@ async def predict(features: CropFeatures):
 
     
 @app.post("/plan-predict/")
-async def predict_plan(location: Annotated[str, Form()], land_size: Annotated[str, Form()], last_crop: Annotated[str, Form()], irrigation: Annotated[str, Form()], season: Annotated[str, Form()], description: Annotated[Optional[str], Form()] = None,images: List[UploadFile] = File(default=[]), video: Optional[UploadFile] = File(None)):
+async def predict_plan(location: Annotated[str, Form()], land_size: Annotated[str, Form()], last_crop: Annotated[str, Form()], irrigation: Annotated[str, Form()], season: Annotated[str, Form()], description: Annotated[Optional[str], Form()] = None,images: List[UploadFile] = File(default=[]), video: Optional[UploadFile] = File(None),lang: Annotated[str, Form()] = "English" ):
     try:
-        prediction = await agriculure_planning(location, land_size, last_crop, irrigation, season, description, images, video)
+        prediction = await agriculure_planning(location, land_size, last_crop, irrigation, season, description, images, video,lang)
         return {"code": str(prediction)} 
     except Exception as e:
         return {"error": str(e)} 
     
+
+@app.post("/plant-analysis/")
+async def plant_analysis( description: Annotated[Optional[str], Form()] = None,images: List[UploadFile] = File(default=[]), video: Optional[UploadFile] = File(None),lang: Annotated[str, Form()] = "English"):
+    if (not images and video is None) or (images and video):
+        raise HTTPException(
+        status_code=400,
+        detail="Please provide either images or a video, not both."
+        )
+    try:
+        prediction=await plant_analysis_func(description,images,video,lang)
+        return {"code":str(prediction)}
+    except Exception as e:
+        return {"error":str(e)}
+
 
 @app.post("/get-audio/")
 async def get_audio(text: Annotated[str, Form()]):
@@ -121,10 +139,62 @@ def get_audio(filename: str):
 
 @app.post("/ask-about-plan/")
 async def ask_about_plan_api(text: str):
-    response = await ask_about_plan(text)
+    response = ask_about_plan(text)
     return {"response": response}
 
 
+chatbot = GeminiChatbot()
+
+class ChatRequest(BaseModel):
+    session_id: str
+    message: str
+
+@app.post("/start-bot/")
+def start_chat():
+    session_id = chatbot.start_session()
+    return {"session_id": session_id, "message": "Chat session started."}
+
+@app.post("/chat-continue/")
+def chat(req: ChatRequest):
+    response = chatbot.send_message(req.session_id, req.message)
+    if response is None:
+        return {"error": "Invalid session_id"}
+    return {"response": response}
+
+class LocationInput(BaseModel):
+    state: str = "Uttar Pradesh"
+    district: str = "Siddharth Nagar"
+
+
+
+@app.post("/get-market-price")
+async def get_mandi_data(location: LocationInput):
+    base_url = "https://api.data.gov.in/resource/9ef84268-d588-465a-a308-a864a43d0070"
+    api_key = PRICE_API_KEY
+
+    # Encode query parameters safely
+    query_params = {
+        "api-key": api_key,
+        "format": "json",
+        "limit": "30",
+        "filters[state.keyword]": location.state,
+        "filters[district]": location.district
+    }
+
+    # Build the full URL with encoded params
+    encoded_params = urllib.parse.urlencode(query_params)
+    full_url = f"{base_url}?{encoded_params}"
+
+    async with httpx.AsyncClient() as client:
+        response = await client.get(full_url)
+
+    if response.status_code == 200:
+        return response.json()
+    else:
+        return {
+            "error": "Failed to fetch mandi data",
+            "status_code": response.status_code
+        }
 
 @app.post("/yield-predict/")
 async def predict_yield_model(features: YieldFeatures):
@@ -154,9 +224,3 @@ async def predict_plant_disease(file: UploadFile = File(...)):
         prediction = predict_disease(image_bytes)
         return {"predicted_disease": prediction}
 
-
-
-
-if __name__ == "__main__":
-    import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=8000)

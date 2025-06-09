@@ -1,8 +1,6 @@
 from PIL import Image
 import google.generativeai as genai
 from google.genai import types, Client
-from googletrans import Translator
-import asyncio
 import wave
 import tempfile
 import os
@@ -10,11 +8,11 @@ import io
 from dotenv import load_dotenv
 import cv2
 from google.genai.types import GenerateContentConfig
-import subprocess
+from moviepy import AudioFileClip, ColorClip
 
 load_dotenv()
 
-GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
+GEMINI_API_KEY=os.getenv("GEMINI_API_KEY")
 CHAT_SESSION = None
 
 def wave_file(filename, pcm, channels=1, rate=24000, sample_width=2):
@@ -206,11 +204,23 @@ Keep explanations short, avoid repeating input data, and emphasize cost-effectiv
 
 Here are the detailes provided by the farmers: {location, land_size, last_crop, irrigation, season, description}
 
-Most importantly provide the complete info in the form of html code which can be placed inside a react div which can we diplayed on web page.
+Provide the complete response as **valid JSX code** that can be placed directly inside a React component.
+
+🌟 HTML Output Requirements:
+Generate each section as a beautiful, modern React card using **Tailwind CSS**.
+
+🧱 Layout:
+Wrap all cards in this responsive grid:
+```jsx
+<div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+  <!-- Fancy cards go here -->
+</div>
+
 
 '''
 
     # Call Gemini API for content generation
+    global CHAT_SESSION
     response = client.models.generate_content(
       model="gemini-2.5-flash-preview-05-20",  # Use a model you have access to (list with client.models.list())
       contents=[full_prompt, *pil_images, frame]
@@ -271,13 +281,29 @@ Please rewrite it as described above.
     audio_file_mp4 = "audio_personalized_planning.mp4"
     
     wave_file(audio_file_wav, data)
-    subprocess.run(['ffmpeg', '-y', '-i', audio_file_wav, audio_file_mp4])
+    audio_clip = AudioFileClip(audio_file_wav)
+    duration = audio_clip.duration
+    video_clip = ColorClip(size=(640, 480), color=(0, 0, 0), duration=duration)
+    video_clip = video_clip.with_fps(24)
+    final_clip = video_clip.with_audio(audio_clip)
+    final_clip.write_videofile(audio_file_mp4, codec="libx264", audio_codec="aac")
     return audio_file_mp4
 
 def ask_about_plan(user_question):
     global CHAT_SESSION
+    if CHAT_SESSION is None:
+        raise RuntimeError("CHAT_SESSION is not initialized. Please call /agriculture-planning first.")
     response = CHAT_SESSION.send_message(user_question)
     return response.text.strip()
+
+
+
+
+
+
+
+
+
 
 # class MockUploadFile:
 #     def __init__(self, filepath):
