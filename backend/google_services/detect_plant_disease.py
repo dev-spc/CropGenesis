@@ -2,6 +2,7 @@ from PIL import Image
 import google.generativeai as genai
 from google.genai import types, Client
 import os
+import io
 from dotenv import load_dotenv
 import cv2
 import tempfile
