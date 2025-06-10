@@ -32,7 +32,7 @@ const ChatBot: React.FC = () => {
     if (!sessionId) {
       setLoadingSession(true);
       try {
-        const res = await axios.post('http://0.0.0.0:8000/start-bot');
+        const res = await axios.post('https://crop-genesis.duckdns.org/start-bot');
         if (res.data.session_id) {
           setSessionId(res.data.session_id);
         }
@@ -51,7 +51,7 @@ const ChatBot: React.FC = () => {
     setInputValue('');
     setWaitingForBot(true);
     try {
-      const res = await axios.post('http://0.0.0.0:8000/chat-continue', {
+      const res = await axios.post('https://crop-genesis.duckdns.org/chat-continue', {
         session_id: sessionId,
         message: userMessage
       });

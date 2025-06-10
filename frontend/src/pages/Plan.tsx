@@ -151,7 +151,7 @@ const Plan: React.FC = () => {
                 apiFormData.append('video', blob);
             }
 
-            const response = await axios.post('http://0.0.0.0:8000/plan-predict', apiFormData, {
+            const response = await axios.post('https://crop-genesis.duckdns.org/plan-predict', apiFormData, {
                 headers: {
                     'Content-Type': 'multipart/form-data',
                 },
@@ -207,7 +207,7 @@ const Plan: React.FC = () => {
         setConversations(prev => [...prev, newConversation]);
 
         try {
-            const response = await axios.post('http://0.0.0.0:8000/ask-about-plan/', {text: prompt});
+            const response = await axios.post('https://crop-genesis.duckdns.org/ask-about-plan/', {text: prompt});
             console.log(conversations)
             setConversations(prev =>
                 prev.map((conv, idx) =>
@@ -235,13 +235,13 @@ const Plan: React.FC = () => {
         setIsAudioLoading(true);
 
         try {
-            const firstApiResponse = await axios.post('http://0.0.0.0:8000/get-audio', {
+            const firstApiResponse = await axios.post('https://crop-genesis.duckdns.org/get-audio', {
                 text: initialHtmlResult,
             });
 
-            setAudioUrl(`http://0.0.0.0:8000/audio/${firstApiResponse.data.name}` || "");
+            setAudioUrl(`https://crop-genesis.duckdns.org/audio/${firstApiResponse.data.name}` || "");
 
-            const audio = new Audio(`http://0.0.0.0:8000/audio/${firstApiResponse.data.name}`);
+            const audio = new Audio(`https://crop-genesis.duckdns.org/audio/${firstApiResponse.data.name}`);
             setAudioElement(audio);
             audio.play().catch(error => {
                 console.error('Error playing audio:', error);

@@ -5,7 +5,7 @@ export const CropPrice = () => {
   const [cropPrices, setCropPrices] = useState<any>([]);
 
   useEffect(() => {
-    axios.post("http://0.0.0.0:8000/get-market-price", {
+    axios.post("https://crop-genesis.duckdns.org/get-market-price", {
       state: "Uttar Pradesh",
       district: "Siddharth Nagar"
     })

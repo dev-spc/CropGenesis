@@ -125,7 +125,7 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({ maxSize = 10, onImageSubm
         formData.append('video', blob);
       }
 
-      const result = await axios.post('http://0.0.0.0:8000/plant-analysis', formData, {
+      const result = await axios.post('https://crop-genesis.duckdns.org/plant-analysis', formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },
