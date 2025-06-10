@@ -16,7 +16,7 @@ from google_services.detect_plant_disease import plant_analysis_func
 from google_services.general_chatbot import GeminiChatbot
 import httpx
 import urllib.parse
-# Load environment variables
+
 load_dotenv()
 
 
@@ -100,14 +100,14 @@ async def predict(features: CropFeatures):
 @app.post("/plan-predict/")
 async def predict_plan(location: Annotated[str, Form()], land_size: Annotated[str, Form()], last_crop: Annotated[str, Form()], irrigation: Annotated[str, Form()], season: Annotated[str, Form()], description: Annotated[Optional[str], Form()] = None,images: List[UploadFile] = File(default=[]), video: Optional[UploadFile] = File(None),lang: Annotated[str, Form()] = "English" ):
     try:
-        prediction = await agriculure_planning(location, land_size, last_crop, irrigation, season, description, images, video,lang)
+        prediction = await agriculure_planning(location, land_size, last_crop, irrigation, season, description, images, video,lang='English')
         return {"code": str(prediction)} 
     except Exception as e:
         return {"error": str(e)} 
     
 
 @app.post("/plant-analysis/")
-async def plant_analysis( description: Annotated[Optional[str], Form()] = None,images: List[UploadFile] = File(default=[]), video: Optional[UploadFile] = File(None),lang: Annotated[str, Form()] = "English"):
+async def plant_analysis( description: Annotated[Optional[str], Form()] = None, images: List[UploadFile] = File(default=[]), video: Optional[UploadFile] = File(None),lang: Annotated[str, Form()] = "English"):
     if (not images and video is None) or (images and video):
         raise HTTPException(
         status_code=400,
@@ -119,9 +119,11 @@ async def plant_analysis( description: Annotated[Optional[str], Form()] = None,i
     except Exception as e:
         return {"error":str(e)}
 
+class TextRequest(BaseModel):
+    text: str
 
 @app.post("/get-audio/")
-async def get_audio(text: Annotated[str, Form()]):
+async def get_audio(text: TextRequest):
     try: 
         prediction = await audio_explanation_planning(text)
         return {"name": prediction} 
@@ -138,7 +140,7 @@ def get_audio(filename: str):
 
 
 @app.post("/ask-about-plan/")
-async def ask_about_plan_api(text: str):
+async def ask_about_plan_api(text: TextRequest):
     response = ask_about_plan(text)
     return {"response": response}
 

@@ -100,7 +100,7 @@ const Navbar: React.FC = () => {
                 setMobileMenuOpen(false);
               }}
             >
-              Try Now
+              Get a plan
             </Button>
           </div>
         </div>

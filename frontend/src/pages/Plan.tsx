@@ -1,32 +1,175 @@
 import React, { useState, type ChangeEvent, type KeyboardEvent } from 'react';
-import { X, Image, Send, Trees } from 'lucide-react';
+import { X, Image, Send, Trees, Upload, Video, Volume2, Loader2 } from 'lucide-react';
 import '../App.css'
 import gemini from '../../public/gemini.png';
 import Navbar from '@/components/Navbar';
 import axios from 'axios';
 import { parseHtmlCodeBlock } from '@/utils/help';
+import { toast } from 'sonner';
 
-
-interface UploadedImage {
+interface UploadedFile {
     id: number;
     url: string;
     name: string;
+    type: 'image' | 'video';
+}
+
+interface FormData {
+    field1: string; 
+    field2: string; 
+    field3: string; 
+    field4: string; 
+    field5: string; 
+    field6: string; 
+    images: UploadedFile[];
+    video: UploadedFile | null;
 }
 
 interface Conversation {
     id: number;
     prompt: string;
-    images: UploadedImage[];
+    images: UploadedFile[];
     result: string | null;
     timestamp: string;
 }
 
 const Plan: React.FC = () => {
+
+    const [showForm, setShowForm] = useState<boolean>(true);
+    const [formData, setFormData] = useState<FormData>({
+        field1: '',
+        field2: '',
+        field3: '',
+        field4: '',
+        field5: '',
+        field6: '',
+        images: [],
+        video: null
+    });
+    const [isFormSubmitting, setIsFormSubmitting] = useState<boolean>(false);
+    const [initialHtmlResult, setInitialHtmlResult] = useState<string>('');
+
+    const [isAudioLoading, setIsAudioLoading] = useState<boolean>(false);
+    const [audioUrl, setAudioUrl] = useState<string>('');
+    const [audioElement, setAudioElement] = useState<HTMLAudioElement | null>(null);
+
     const [prompt, setPrompt] = useState<string>('');
-    const [images, setImages] = useState<UploadedImage[]>([]);
+    const [images, setImages] = useState<UploadedFile[]>([]);
     const [conversations, setConversations] = useState<Conversation[]>([]);
     const [isProcessing, setIsProcessing] = useState<boolean>(false);
-    const [code, setCode] = useState<any>();
+
+    const handleFormFieldChange = (field: keyof FormData, value: string) => {
+        setFormData(prev => ({ ...prev, [field]: value }));
+    };
+
+    const handleFormImageUpload = (e: ChangeEvent<HTMLInputElement>) => {
+        const files = Array.from(e.target.files || []);
+
+        files.forEach(file => {
+            const reader = new FileReader();
+            reader.onload = (event) => {
+                setFormData(prev => ({
+                    ...prev,
+                    images: [...prev.images, {
+                        id: Date.now() + Math.random(),
+                        url: event.target?.result as string,
+                        name: file.name,
+                        type: 'image'
+                    }]
+                }));
+            };
+            reader.readAsDataURL(file);
+        });
+    };
+
+    const handleFormVideoUpload = (e: ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = (event) => {
+            setFormData(prev => ({
+                ...prev,
+                video: {
+                    id: Date.now(),
+                    url: event.target?.result as string,
+                    name: file.name,
+                    type: 'video'
+                }
+            }));
+        };
+        reader.readAsDataURL(file);
+    };
+
+    const removeFormImage = (id: number) => {
+        setFormData(prev => ({
+            ...prev,
+            images: prev.images.filter(img => img.id !== id)
+        }));
+    };
+
+    const removeFormVideo = () => {
+        setFormData(prev => ({ ...prev, video: null }));
+    };
+
+    const handleFormSubmit = async () => {
+        if (!formData.field1 || !formData.field2 || !formData.field3 || !formData.field4 || !formData.field5 || !formData.field6) {
+            toast('Please fill all required fields');
+            return;
+        }
+
+        setIsFormSubmitting(true);
+
+        try {
+            const apiFormData = new FormData();
+            apiFormData.append('location', formData.field1);
+            apiFormData.append('land_size', formData.field2);
+            apiFormData.append('last_crop', formData.field3);
+            apiFormData.append('irrigation', formData.field4);
+            apiFormData.append('season', formData.field5);
+            apiFormData.append('description', formData.field6);
+
+            formData.images.forEach((image) => {
+                const base64Data = image.url.split(',')[1];
+                const byteArray = atob(base64Data);
+                const uint8Array = new Uint8Array(byteArray.length);
+                for (let i = 0; i < byteArray.length; i++) {
+                    uint8Array[i] = byteArray.charCodeAt(i);
+                }
+                const blob = new Blob([uint8Array], { type: 'image/jpeg' });
+                apiFormData.append('images', blob);
+            });
+
+            if (formData.video) {
+                const base64Data = formData.video.url.split(',')[1];
+                const byteArray = atob(base64Data);
+                const uint8Array = new Uint8Array(byteArray.length);
+                for (let i = 0; i < byteArray.length; i++) {
+                    uint8Array[i] = byteArray.charCodeAt(i);
+                }
+                const blob = new Blob([uint8Array], { type: 'video/mp4' });
+                apiFormData.append('video', blob);
+            }
+
+            const response = await axios.post('http://0.0.0.0:8000/plan-predict', apiFormData, {
+                headers: {
+                    'Content-Type': 'multipart/form-data',
+                },
+            });
+
+            console.log('Form Success:', response.data);
+            setInitialHtmlResult(response.data.html || response.data.code || '');
+            setShowForm(false);
+        } catch (error) {
+            if (axios.isAxiosError(error)) {
+                console.error('Form Axios error:', error.response?.data || error.message);
+            } else {
+                console.error('Form Unexpected error:', error);
+            }
+        }
+
+        setIsFormSubmitting(false);
+    };
 
     const handleImageUpload = (e: ChangeEvent<HTMLInputElement>) => {
         const files = Array.from(e.target.files || []);
@@ -37,7 +180,8 @@ const Plan: React.FC = () => {
                 setImages(prev => [...prev, {
                     id: Date.now() + Math.random(),
                     url: event.target?.result as string,
-                    name: file.name
+                    name: file.name,
+                    type: 'image'
                 }]);
             };
             reader.readAsDataURL(file);
@@ -51,24 +195,8 @@ const Plan: React.FC = () => {
     const handleSubmit = async () => {
         if (!prompt.trim() && images.length === 0) return;
 
-        const body = {
-            location: "Punjab, India",
-            field_photo: "Attached",
-            last_crop: "Wheat",
-            land_size: "1–3 acres",
-            budget: "Medium",
-            preference: "Max Profit",
-            irrigation: "Borewell",
-            weather_tolerance: "Okay with some risk",
-            machinery: "Tractor",
-            labor: "Easy",
-            openness: "Open to suggestions",
-            crop_type: "Cereal"
-        };
-
         setIsProcessing(true);
 
-        // Add the new conversation first (with no result yet)
         const newConversation: Conversation = {
             id: Date.now(),
             prompt: prompt,
@@ -79,29 +207,54 @@ const Plan: React.FC = () => {
         setConversations(prev => [...prev, newConversation]);
 
         try {
-            // Send the POST request as soon as Send is clicked
-            const response = await axios.post('http://0.0.0.0:8000/plan-predict/', body);
-            console.log('Success:', response.data);
-            setCode(response.data.code);
-            // Update the last conversation with the result
+            const response = await axios.post('http://0.0.0.0:8000/ask-about-plan/', {text: prompt});
+            console.log(conversations)
             setConversations(prev =>
                 prev.map((conv, idx) =>
                     idx === prev.length - 1
-                        ? { ...conv, result: response.data.code }
+                        ? { ...conv, result: response.data.response }
                         : conv
                 )
             );
         } catch (error) {
             if (axios.isAxiosError(error)) {
-                console.error('Axios error:', error.response?.data || error.message);
+                console.error('Chat Axios error:', error.response?.data || error.message);
             } else {
-                console.error('Unexpected error:', error);
+                console.error('Chat Unexpected error:', error);
             }
         }
 
         setIsProcessing(false);
         setPrompt('');
         setImages([]);
+    };
+
+    const handleAudioExplanation = async () => {
+        if (!initialHtmlResult) return;
+
+        setIsAudioLoading(true);
+
+        try {
+            const firstApiResponse = await axios.post('http://0.0.0.0:8000/get-audio', {
+                text: initialHtmlResult,
+            });
+
+            setAudioUrl(`http://0.0.0.0:8000/audio/${firstApiResponse.data.name}` || "");
+
+            const audio = new Audio(`http://0.0.0.0:8000/audio/${firstApiResponse.data.name}`);
+            setAudioElement(audio);
+            audio.play().catch(error => {
+                console.error('Error playing audio:', error);
+            });
+        } catch (error) {
+            if (axios.isAxiosError(error)) {
+                console.error('Audio API error:', error.response?.data || error.message);
+            } else {
+                console.error('Audio Unexpected error:', error);
+            }
+        }
+
+        setIsAudioLoading(false);
     };
 
     const handleKeyPress = (e: KeyboardEvent<HTMLTextAreaElement>) => {
@@ -111,18 +264,237 @@ const Plan: React.FC = () => {
         }
     };
 
-    return (
-        <div className="flex flex-col justify-between h-screen  border-0 rounded-xl">
-            {/* Results Area */}
+    // Form UI
+    const renderForm = () => (
+        <div className="flex items-center justify-center min-h-screen bg-gray-50 p-4 pt-32">
+            <Navbar/>
+            <div className="bg-white rounded-lg shadow-lg p-8 w-full max-w-2xl">
+                <h2 className="text-2xl font-bold text-center mb-6">Initial Setup Form</h2>
+                
+                {/* Form Fields - 2 fields per row */}
+                <div className="space-y-4 mb-6">
+                    <div className="flex gap-4">
+                        <div className="flex-1">
+                            <label className="block text-sm font-medium text-gray-700 mb-2">Location</label>
+                            <input
+                                type="text"
+                                value={formData.field1}
+                                onChange={(e) => handleFormFieldChange('field1', e.target.value)}
+                                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                placeholder="Enter location"
+                            />
+                        </div>
+                        <div className="flex-1">
+                            <label className="block text-sm font-medium text-gray-700 mb-2">Land Size</label>
+                            <input
+                                type="text"
+                                value={formData.field2}
+                                onChange={(e) => handleFormFieldChange('field2', e.target.value)}
+                                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                placeholder="Enter land size"
+                            />
+                        </div>
+                    </div>
+                    <div className="flex gap-4">
+                        <div className="flex-1">
+                            <label className="block text-sm font-medium text-gray-700 mb-2">Last Crop</label>
+                            <input
+                                type="text"
+                                value={formData.field3}
+                                onChange={(e) => handleFormFieldChange('field3', e.target.value)}
+                                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                placeholder="Enter last crop"
+                            />
+                        </div>
+                        <div className="flex-1">
+                            <label className="block text-sm font-medium text-gray-700 mb-2">Irrigation</label>
+                            <input
+                                type="text"
+                                value={formData.field4}
+                                onChange={(e) => handleFormFieldChange('field4', e.target.value)}
+                                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                placeholder="Enter irrigation method"
+                            />
+                        </div>
+                    </div>
+                    <div className="flex gap-4">
+                        <div className="flex-1">
+                            <label className="block text-sm font-medium text-gray-700 mb-2">Season</label>
+                            <input
+                                type="text"
+                                value={formData.field5}
+                                onChange={(e) => handleFormFieldChange('field5', e.target.value)}
+                                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                placeholder="Enter season"
+                            />
+                        </div>
+                        <div className="flex-1">
+                            <label className="block text-sm font-medium text-gray-700 mb-2">Description</label>
+                            <textarea
+                                value={formData.field6}
+                                onChange={(e) => handleFormFieldChange('field6', e.target.value)}
+                                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 min-h-[80px]"
+                                placeholder="Enter description"
+                                rows={3}
+                            />
+                        </div>
+                    </div>
+                </div>
+
+                {/* Image Upload */}
+                <div className="mb-6">
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Upload Images</label>
+                    <label className="flex items-center justify-center w-full h-20 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer hover:bg-gray-50">
+                        <div className="flex flex-col items-center">
+                            <Upload className="w-6 h-6 text-gray-400 mb-2" />
+                            <span className="text-xs text-gray-500">Click to upload images</span>
+                        </div>
+                        <input
+                            type="file"
+                            multiple
+                            accept="image/*"
+                            onChange={handleFormImageUpload}
+                            className="hidden"
+                        />
+                    </label>
+                    
+                    {/* Image Previews */}
+                    {formData.images.length > 0 && (
+                        <div className="flex flex-wrap gap-2 mt-3">
+                            {formData.images.map(img => (
+                                <div key={img.id} className="relative group">
+                                    <img
+                                        src={img.url}
+                                        alt={img.name}
+                                        className="w-14 h-14 object-cover rounded-lg border-2 border-gray-200"
+                                    />
+                                    <button
+                                        onClick={() => removeFormImage(img.id)}
+                                        className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                                    >
+                                        <X size={14} />
+                                    </button>
+                                </div>
+                            ))}
+                        </div>
+                    )}
+                </div>
+
+                {/* Video Upload */}
+                <div className="mb-6">
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Upload Video</label>
+                    {formData.video ? (
+                        <div className="relative group mt-3">
+                            <video
+                                src={formData.video.url}
+                                className="w-full h-36 object-cover rounded-lg border-2 border-gray-200"
+                                controls
+                            />
+                            <button
+                                onClick={removeFormVideo}
+                                className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                            >
+                                <X size={14} />
+                            </button>
+                        </div>
+                    ) : (
+                        <label className="flex items-center justify-center w-full h-20 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer hover:bg-gray-50">
+                            <div className="flex flex-col items-center">
+                                <Video className="w-6 h-6 text-gray-400 mb-2" />
+                                <span className="text-xs text-gray-500">Click to upload video</span>
+                            </div>
+                            <input
+                                type="file"
+                                accept="video/*"
+                                onChange={handleFormVideoUpload}
+                                className="hidden"
+                            />
+                        </label>
+                    )}
+                </div>
+
+                {/* Submit Button */}
+                <button
+                    onClick={handleFormSubmit}
+                    disabled={isFormSubmitting || !formData.field1 || !formData.field2 || !formData.field3 || !formData.field4 || !formData.field5 || !formData.field6}
+                    className="w-full px-4 py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors flex items-center justify-center space-x-2"
+                >
+                    {isFormSubmitting ? (
+                        <>
+                            <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                            <span>Processing...</span>
+                        </>
+                    ) : (
+                        <span>Submit Form</span>
+                    )}
+                </button>
+            </div>
+        </div>
+    );
+
+    // Chat UI (updated: initial analysis result is part of chat flow)
+    const renderChat = () => (
+        <div className="flex flex-col justify-between h-screen border-0 rounded-xl">
             <Navbar />
-            <div className=" overflow-y-auto p-4 pt-28 space-y-4">
+
+            {/* Results Area: initialHtmlResult as first message, then conversations */}
+            <div className="overflow-y-auto p-4 pt-28 space-y-4 flex-1">
+                {/* Initial Analysis Result as first message in chat flow */}
+                {initialHtmlResult && (
+                    <div className="bg-yellow-50 border-l-4 border-yellow-400 p-4 rounded-lg">
+                        <div className="flex">
+                            <div className="ml-3 flex-1">
+                                <p className="text-sm text-yellow-700 mb-2">Initial Analysis Result:</p>
+                                <div className="text-yellow-600 mb-4">
+                                    {parseHtmlCodeBlock(initialHtmlResult)}
+                                </div>
+                                {/* Audio Explanation Button */}
+                                <div className="flex items-center space-x-2">
+                                    <button
+                                        onClick={handleAudioExplanation}
+                                        disabled={isAudioLoading || !!audioUrl}
+                                        className="flex items-center space-x-2 px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
+                                    >
+                                        {isAudioLoading ? (
+                                            <>
+                                                <Loader2 size={16} className="animate-spin" />
+                                                <span>Generating Audio...</span>
+                                            </>
+                                        ) : (
+                                            <>
+                                                <Volume2 size={16} />
+                                                <span>Listen Audio Explanation</span>
+                                            </>
+                                        )}
+                                    </button>
+                                    {/* Audio Controls */}
+                                    {audioUrl && audioElement && (
+                                        <div className="flex items-center space-x-2">
+                                            <audio
+                                                ref={(audio) => {
+                                                    if (audio && audioUrl) {
+                                                        audio.src = audioUrl;
+                                                    }
+                                                }}
+                                                controls
+                                                className="h-8"
+                                            />
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                )}
+
+                {/* Conversation messages */}
                 {conversations.length === 0 ? (
                     <div className="text-center text-gray-500 mt-20">
                         <Trees size={48} className="mx-auto mb-4 text-gray-300" />
-                        <p>You are just a step away from efficient farming</p>
+                        <p>Start your conversation below</p>
                     </div>
                 ) : (
-                    conversations.map(conv => (
+                    conversations.map((conv) => (
                         <div key={conv.id} className="bg-white rounded-lg shadow-sm p-6 space-y-4">
                             {/* User Prompt */}
                             <div className="space-y-3">
@@ -162,7 +534,7 @@ const Plan: React.FC = () => {
                                         <p className="text-xs text-gray-500 mb-2">powered by Gemini</p>
                                     </div>
                                     <div className="pl-11">
-                                        {parseHtmlCodeBlock(code)}
+                                        {conv.result}
                                     </div>
                                 </div>
                             )}
@@ -223,18 +595,6 @@ const Plan: React.FC = () => {
                             rows={1}
                             style={{ minHeight: '48px', maxHeight: '120px' }}
                         />
-
-                        {/* Image Upload Button */}
-                        <label className="absolute right-2 bottom-3 cursor-pointer text-gray-400 hover:text-gray-600 transition-colors">
-                            <Image size={20} />
-                            <input
-                                type="file"
-                                multiple
-                                accept="image/*"
-                                onChange={handleImageUpload}
-                                className="hidden"
-                            />
-                        </label>
                     </div>
 
                     {/* Send Button */}
@@ -250,6 +610,8 @@ const Plan: React.FC = () => {
             </div>
         </div>
     );
+
+    return showForm ? renderForm() : renderChat();
 };
 
 export default Plan;

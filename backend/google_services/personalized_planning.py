@@ -98,7 +98,7 @@ async def agriculure_planning(
     # Base prompt for farming plan
     full_prompt = f'''
     Answer in {lang} language.
-You are an intelligent agricultural assistant. Based on the following user inputs from a farmer, generate a well-structured, personalized farming plan that maximizes profit while respecting the farmer's constraints and preferences.
+    You are an intelligent agricultural assistant. Based on the following user inputs from a farmer, generate a well-structured, personalized farming plan that maximizes profit while respecting the farmer's constraints and preferences.Add commentMore actions
 
 🧩 Step 1: Required Inputs
 Location: [Provide pin code or GPS coordinates]
@@ -201,22 +201,9 @@ Bullet list of what to do immediately, in 1 month, 3 months, and 6 months.
 Provide the plan as a structured guide, organized under clear headings, using bullet points, tables, and bold where needed. Keep language simple and practical, suitable for an Indian farmer, while still technically sound.
 
 Keep explanations short, avoid repeating input data, and emphasize cost-effective and locally feasible advice.
+Here are the detailes provided by the farmers: {location, land_size, last_crop, irrigation, season, description}Add commentMore actions
 
-Here are the detailes provided by the farmers: {location, land_size, last_crop, irrigation, season, description}
-
-Provide the complete response as **valid JSX code** that can be placed directly inside a React component.
-
-🌟 HTML Output Requirements:
-Generate each section as a beautiful, modern React card using **Tailwind CSS**.
-
-🧱 Layout:
-Wrap all cards in this responsive grid:
-```jsx
-<div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-  <!-- Fancy cards go here -->
-</div>
-
-
+Most importantly provide the complete info in the form of html code which can be placed inside a react div which can we diplayed on web page.
 '''
 
     # Call Gemini API for content generation
@@ -231,7 +218,7 @@ Wrap all cards in this responsive grid:
     CHAT_SESSION = client.chats.create(model="gemini-2.5-flash-preview-05-20")
     CHAT_SESSION.send_message(
         f"You are an expert agricultural assistant. Here is the farming plan:\n\n{output_text}\n\n"
-        "Use this plan to answer any questions. If you cant find answers than google search it."
+        "Use this plan to answer any questions. If you can't find answers than google search it. Also provide the output in paragraph form only, no markdown only text"
     )
 
     return output_text
@@ -248,7 +235,7 @@ async def audio_explanation_planning(text):
 3. Make sure your explanation is practical, easy to follow, and sounds like natural speech.
 4. Do not use complicated jargon or technical terms unless you explain them simply.
 
-Now, here is the explanation you need to convert:
+Now, here is the explanation you need to convert, this explanation is in form of html code you have to extract the information from it:
 {text}
 
 Please rewrite it as described above.
@@ -293,69 +280,6 @@ def ask_about_plan(user_question):
     global CHAT_SESSION
     if CHAT_SESSION is None:
         raise RuntimeError("CHAT_SESSION is not initialized. Please call /agriculture-planning first.")
-    response = CHAT_SESSION.send_message(user_question)
+    response = CHAT_SESSION.send_message(f"{user_question}")
     return response.text.strip()
 
-
-
-
-
-
-
-
-
-
-# class MockUploadFile:
-#     def __init__(self, filepath):
-#         self.filename = os.path.basename(filepath)
-#         self.filepath = filepath
-
-#     async def read(self):
-#         with open(self.filepath, "rb") as f:
-#             return f.read()
-
-
-# if __name__ == "__main__":
-#     image_path = "RiceFieldClip.mp4"
-
-#     farmer_inputs = {
-#     "location": "Punjab, India",
-#     "field_photo": "Attached",
-#     "last_crop": "Wheat",
-#     "land_size": "1–3 acres",
-#     "budget": "Medium",
-#     "preference": "Max Profit",
-#     "irrigation": "Borewell",
-#     "weather_tolerance": "Okay with some risk",
-#     "machinery": "Tractor",
-#     "labor": "Easy",
-#     "openness": "Open to suggestions",
-#     "crop_type": "Cereal",
-# }
-#     location = "Punjab, India"
-#     lang = "English"
-#     land_size = "1-3 acres"
-#     last_crop = "Wheat"
-#     irrigation = "Borewell"
-#     season = "Kharif"
-#     description = "Field with loamy soil, moderate fertility, and good drainage."
-#     video_path = "RiceFieldClip.mp4"
-#     video_file = MockUploadFile(video_path)
-#     lang = "English"
-#     result_text = asyncio.run(agriculure_planning(location, land_size, last_crop, irrigation, season, description, video=None, lang=lang))
-#     print("\n=== Product Info & Usage ===\n")
-#     print(result_text)
-#     audio_pref = input("Do you want explanation in audio format? (y/n) ")
-#     if(audio_pref=='y'):
-#         audio_path = asyncio.run(audio_explanation_planning(result_text))
-#         print(f"\n🔊 Voice file saved at: {audio_path}")
-
-#     print("\n=== Chatbot: Ask your doubts about the plan! (Type 'exit' to quit) ===\n")
-#     while(True):
-#         user_input = input("\nUser: ")
-#         if(user_input.lower() in ['exit', 'quit']):
-#             print("Chatbot: Goodbye!")
-#             break
-#         chatbot_response = ask_about_plan(user_input)
-#         print("Chatbot:", chatbot_response)
-    

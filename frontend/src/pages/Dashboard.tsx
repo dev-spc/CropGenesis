@@ -194,19 +194,19 @@ const Dashboard = () => {
         </div>
         
         <Tabs defaultValue="imageManager" className="w-full max-w-4xl mx-auto opacity-0 animate-fadeIn animation-delay-200" onValueChange={handleTabChange}>
-          <TabsList className="grid w-full grid-cols-3">
+          <TabsList className="grid w-full grid-cols-1">
             <TabsTrigger value="imageManager" className="flex items-center gap-2">
               <Image className="h-4 w-4" />
               <span>Plant Village Model</span>
             </TabsTrigger>
-            <TabsTrigger value="cropManagement" className="flex items-center gap-2">
+            {/* <TabsTrigger value="cropManagement" className="flex items-center gap-2">
             <TreeDeciduous className="h-4 w-4"/>
               <span>Crop Recommendation</span>
             </TabsTrigger>
             <TabsTrigger value="settings" className="flex items-center gap-2">
             <Leaf className="h-4 w-4" />
               <span>Yield Prediction</span>
-            </TabsTrigger>
+            </TabsTrigger> */}
           </TabsList>
           
           {/* Image Manager Tab */}

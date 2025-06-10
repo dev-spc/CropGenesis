@@ -14,7 +14,8 @@ interface ImageUploaderProps {
 
 const ImageUploader: React.FC<ImageUploaderProps> = ({ maxSize = 10, onImageSubmitted, setAnalysisResponse }) => {
   const [isDragging, setIsDragging] = useState(false);
-  const [uploadedImage, setUploadedImage] = useState<string | null>(null);
+  const [uploadedFile, setUploadedFile] = useState<string | null>(null);
+  const [uploadedFileType, setUploadedFileType] = useState<'image' | 'video' | null>(null);
   const [uploading, setUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
   const [imageError, setImageError] = useState<string | null>(null);
@@ -50,7 +51,7 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({ maxSize = 10, onImageSubm
     return () => clearInterval(interval);
   };
 
-  const processImage = (file: File) => {
+  const processFile = (file: File) => {
     if (file.size > maxSize * 1024 * 1024) {
       setImageError(`File size exceeds ${maxSize}MB limit`);
       toast({
@@ -60,23 +61,21 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({ maxSize = 10, onImageSubm
       });
       return;
     }
-    
-    if (!file.type.startsWith('image/')) {
-      setImageError('Only image files are allowed');
+    if (!file.type.startsWith('image/') && !file.type.startsWith('video/')) {
+      setImageError('Only image or video files are allowed');
       toast({
         title: "Invalid file type",
-        description: "Please upload an image file",
+        description: "Please upload an image or video file",
         variant: "destructive",
       });
       return;
     }
-    
     setImageError(null);
-    
     const reader = new FileReader();
     reader.onload = (e) => {
       if (e.target?.result) {
-        setUploadedImage(e.target.result as string);
+        setUploadedFile(e.target.result as string);
+        setUploadedFileType(file.type.startsWith('image/') ? 'image' : 'video');
         simulateUpload();
       }
     };
@@ -86,15 +85,14 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({ maxSize = 10, onImageSubm
   const handleDrop = (e: React.DragEvent) => {
     e.preventDefault();
     setIsDragging(false);
-    
     if (e.dataTransfer.files && e.dataTransfer.files[0]) {
-      processImage(e.dataTransfer.files[0]);
+      processFile(e.dataTransfer.files[0]);
     }
   };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
-      processImage(e.target.files[0]);
+      processFile(e.target.files[0]);
     }
   };
 
@@ -103,7 +101,8 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({ maxSize = 10, onImageSubm
   };
 
   const resetUpload = () => {
-    setUploadedImage(null);
+    setUploadedFile(null);
+    setUploadedFileType(null);
     setUploading(false);
     setUploadProgress(0);
     setIsProcessed(false);
@@ -114,33 +113,28 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({ maxSize = 10, onImageSubm
   };
 
   const handleSubmit = async () => {
-    if (!uploadedImage) return;
-
+    if (!uploadedFile || !uploadedFileType) return;
     try {
       setUploading(true);
-
-      const response = await fetch(uploadedImage);
+      const response = await fetch(uploadedFile);
       const blob = await response.blob();
-      
       const formData = new FormData();
-      formData.append('file', blob, 'image.jpg');
-      formData.append('image', uploadedImage);
+      if (uploadedFileType === 'image') {
+        formData.append('images', blob);
+      } else if (uploadedFileType === 'video') {
+        formData.append('video', blob);
+      }
 
-      const result = await axios.post('https://cropgenesis.duckdns.org/plant-disease/', formData, {
+      const result = await axios.post('http://0.0.0.0:8000/plant-analysis', formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },
       });
-      const res = await axios.post('https://cropgenesis.duckdns.org/generate/1', {
-        prompt: result.data.predicted_disease,
-      });
-      setAnalysisResponse(res.data.response);
-
+      setAnalysisResponse(result.data.code || '');
       toast({
         title: "Success",
-        description: "Image uploaded successfully",
+        description: "File uploaded successfully",
       });
-
       if (onImageSubmitted) {
         onImageSubmitted();
       } else {
@@ -149,7 +143,7 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({ maxSize = 10, onImageSubm
     } catch (error) {
       toast({
         title: "Error",
-        description: "Failed to upload image. Please try again.",
+        description: "Failed to upload file. Please try again.",
         variant: "destructive",
       });
     } finally {
@@ -160,19 +154,19 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({ maxSize = 10, onImageSubm
   return (
     <div className="max-w-2xl w-full mx-auto">
       <div 
-        className={`upload-zone glass-panel ${isDragging ? 'upload-zone-drag' : 'upload-zone-idle'} ${uploadedImage ? 'border-none' : ''}`}
+        className={`upload-zone glass-panel ${isDragging ? 'upload-zone-drag' : 'upload-zone-idle'} ${uploadedFile ? 'border-none' : ''}`}
         onDragOver={handleDragOver}
         onDragLeave={handleDragLeave}
         onDrop={handleDrop}
       >
-        {uploadedImage ? (
+        {uploadedFile ? (
           <div className="w-full h-full flex flex-col items-center">
             <div className="relative w-full max-h-80 overflow-hidden rounded-lg mb-4 flex justify-center items-center">
-              <img 
-                src={uploadedImage} 
-                alt="Uploaded preview" 
-                className="w-full h-full object-contain"
-              />
+              {uploadedFileType === 'image' ? (
+                <img src={uploadedFile} alt="Uploaded preview" className="w-full h-full object-contain" />
+              ) : (
+                <video src={uploadedFile} controls className="w-full h-full object-contain" />
+              )}
               {uploading && (
                 <div className="absolute inset-0 bg-black/20 backdrop-blur-sm flex items-center justify-center">
                   <div className="flex flex-col items-center gap-3 text-white">
@@ -188,17 +182,15 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({ maxSize = 10, onImageSubm
             
             <div className="flex gap-3 mt-4">
               {!uploading && (
-                <>
-                  <Button 
-                    variant="outline" 
-                    className="gap-2 bg-red-50 text-google-red border-red-100"
-                    onClick={resetUpload}
-                    disabled={uploading}
-                  >
-                    <X className="h-4 w-4" />
-                    <span>Remove</span>
-                  </Button>
-                </>
+                <Button 
+                  variant="outline" 
+                  className="gap-2 bg-red-50 text-google-red border-red-100"
+                  onClick={resetUpload}
+                  disabled={uploading}
+                >
+                  <X className="h-4 w-4" />
+                  <span>Remove</span>
+                </Button>
               )}
             </div>
             
@@ -207,7 +199,7 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({ maxSize = 10, onImageSubm
                 className="mt-6 gap-2 bg-google-blue hover:bg-google-blue/90 text-white"
                 onClick={handleSubmit}
               >
-                Submit Image
+                Submit {uploadedFileType === 'image' ? 'Image' : 'Video'}
               </Button>
             )}
           </div>
@@ -216,9 +208,9 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({ maxSize = 10, onImageSubm
             <div className="rounded-full bg-google-blue/5 p-6 mb-4 beautiful-transition">
               <Image className="h-12 w-12 text-google-blue" />
             </div>
-            <h3 className="text-xl font-medium mb-2">Upload Image</h3>
+            <h3 className="text-xl font-medium mb-2">Upload Image or Video</h3>
             <p className="text-gray-500 mb-6 text-balance max-w-md">
-              Drag and drop your image file here, or click to browse your files
+              Drag and drop your image or video file here, or click to browse your files
             </p>
             <Button 
               variant="outline" 
@@ -244,7 +236,7 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({ maxSize = 10, onImageSubm
           ref={fileInputRef}
           type="file"
           className="hidden"
-          accept="image/*"
+          accept="image/*,video/*"
           onChange={handleFileChange}
         />
       </div>
