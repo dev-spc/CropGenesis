@@ -114,7 +114,7 @@ const Plan: React.FC = () => {
     };
 
     const handleFormSubmit = async () => {
-        if (!formData.field1 || !formData.field2 || !formData.field3 || !formData.field4 || !formData.field5 || !formData.field6) {
+        if (!formData.field1 || !formData.field2 || !formData.field3 || !formData.field4 || !formData.field5) {
             toast('Please fill all required fields');
             return;
         }
@@ -272,7 +272,7 @@ const Plan: React.FC = () => {
         <div className="flex items-center justify-center min-h-screen bg-gray-50 p-4 pt-32">
             <Navbar/>
             <div className="bg-white rounded-lg shadow-lg p-8 w-full max-w-2xl">
-                <h2 className="text-2xl font-bold text-center mb-6">Initial Setup Form</h2>
+                <h2 className="text-2xl font-bold text-center mb-6">Agricultural Planning Input Form</h2>
                 
                 {/* Preferred Language Dropdown */}
                 <div className="mb-6">
@@ -289,6 +289,8 @@ const Plan: React.FC = () => {
                         <option value="Punjabi">Punjabi</option>
                         <option value="Tamil">Tamil</option>
                         <option value="Telugu">Telugu</option>
+                        <option value="Gujarati">Gujarati</option>
+                        <option value="Malayalam">Malayalam</option>
                     </select>
                 </div>
 
@@ -296,7 +298,9 @@ const Plan: React.FC = () => {
                 <div className="space-y-4 mb-6">
                     <div className="flex gap-4">
                         <div className="flex-1">
-                            <label className="block text-sm font-medium text-gray-700 mb-2">Location</label>
+                            <label className="block text-sm font-medium text-gray-700 mb-2">
+                                Location <span className="text-red-500">*</span>
+                            </label>
                             <input
                                 type="text"
                                 value={formData.field1}
@@ -306,7 +310,9 @@ const Plan: React.FC = () => {
                             />
                         </div>
                         <div className="flex-1">
-                            <label className="block text-sm font-medium text-gray-700 mb-2">Land Size</label>
+                            <label className="block text-sm font-medium text-gray-700 mb-2">
+                                Land Size <span className="text-red-500">*</span>
+                            </label>
                             <input
                                 type="text"
                                 value={formData.field2}
@@ -318,7 +324,9 @@ const Plan: React.FC = () => {
                     </div>
                     <div className="flex gap-4">
                         <div className="flex-1">
-                            <label className="block text-sm font-medium text-gray-700 mb-2">Last Crop</label>
+                            <label className="block text-sm font-medium text-gray-700 mb-2">
+                                Last Crop <span className="text-red-500">*</span>
+                            </label>
                             <input
                                 type="text"
                                 value={formData.field3}
@@ -328,7 +336,9 @@ const Plan: React.FC = () => {
                             />
                         </div>
                         <div className="flex-1">
-                            <label className="block text-sm font-medium text-gray-700 mb-2">Irrigation</label>
+                            <label className="block text-sm font-medium text-gray-700 mb-2">
+                                Irrigation <span className="text-red-500">*</span>
+                            </label>
                             <input
                                 type="text"
                                 value={formData.field4}
@@ -340,7 +350,9 @@ const Plan: React.FC = () => {
                     </div>
                     <div className="flex gap-4">
                         <div className="flex-1">
-                            <label className="block text-sm font-medium text-gray-700 mb-2">Season</label>
+                            <label className="block text-sm font-medium text-gray-700 mb-2">
+                                Season <span className="text-red-500">*</span>
+                            </label>
                             <input
                                 type="text"
                                 value={formData.field5}
@@ -350,12 +362,14 @@ const Plan: React.FC = () => {
                             />
                         </div>
                         <div className="flex-1">
-                            <label className="block text-sm font-medium text-gray-700 mb-2">Description</label>
+                            <label className="block text-sm font-medium text-gray-700 mb-2">
+                                Additional Description
+                            </label>
                             <textarea
                                 value={formData.field6}
                                 onChange={(e) => handleFormFieldChange('field6', e.target.value)}
                                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 min-h-[80px]"
-                                placeholder="Enter description"
+                                placeholder="Enter description (optional)"
                                 rows={3}
                             />
                         </div>
@@ -364,7 +378,7 @@ const Plan: React.FC = () => {
 
                 {/* Image Upload */}
                 <div className="mb-6">
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Upload Images</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Upload Images <span className="text-gray-400">(optional)</span></label>
                     <label className="flex items-center justify-center w-full h-20 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer hover:bg-gray-50">
                         <div className="flex flex-col items-center">
                             <Upload className="w-6 h-6 text-gray-400 mb-2" />
@@ -403,7 +417,7 @@ const Plan: React.FC = () => {
 
                 {/* Video Upload */}
                 <div className="mb-6">
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Upload Video</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Upload Video <span className="text-gray-400">(optional)</span></label>
                     {formData.video ? (
                         <div className="relative group mt-3">
                             <video
@@ -437,7 +451,7 @@ const Plan: React.FC = () => {
                 {/* Submit Button */}
                 <button
                     onClick={handleFormSubmit}
-                    disabled={isFormSubmitting || !formData.field1 || !formData.field2 || !formData.field3 || !formData.field4 || !formData.field5 || !formData.field6}
+                    disabled={isFormSubmitting || !formData.field1 || !formData.field2 || !formData.field3 || !formData.field4 || !formData.field5}
                     className="w-full px-4 py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors flex items-center justify-center space-x-2"
                 >
                     {isFormSubmitting ? (

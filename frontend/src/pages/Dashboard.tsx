@@ -187,9 +187,9 @@ const Dashboard = () => {
           <span className="px-4 py-1.5 text-xs font-medium text-google-blue bg-google-blue/10 rounded-full mb-4 inline-block">
             Dashboard
           </span>
-          <h1 className="text-3xl font-bold mb-3">Crop Management Center</h1>
+          <h1 className="text-3xl font-bold mb-3">Crop Analysis Center</h1>
           <p className="text-gray-600 max-w-2xl mx-auto text-balance">
-            Manage your crops, analyze images, and configure settings all in one place
+            Manage your crops, analyze using images and videos in one place
           </p>
         </div>
         

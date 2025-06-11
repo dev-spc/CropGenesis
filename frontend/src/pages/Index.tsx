@@ -11,22 +11,26 @@ const Index = () => {
   const navigate = useNavigate();
   
   const features = [
-    {
-      icon: <p className="h-6 w-6 text-google-blue text-center" >🌾</p>,
-      title: "Plant Village Model",
-      description: "A unified system to support rural agriculture through smart planning and tech-driven insights."
-    },
-    {
-      icon: <p className="h-6 w-6 text-google-red text-center" >🌱</p>,
-      title: "Crop Recommendation",
-      description: "AI-powered suggestions based on soil, weather, and regional trends to help farmers grow the right crops."
-    },
-    {
-      icon: <p className="h-6 w-6 text-google-yellow text-center" >📈</p>,
-      title: "Yield Prediction",
-      description: "Accurate yield forecasts using satellite data and machine learning for better harvest planning and pricing."
-    }
-  ];
+  {
+    icon: <p className="h-6 w-6 text-google-blue text-center">🗺️</p>,
+    title: "Get a Plan Model",
+    description:
+      "Generate a complete agricultural plan using minimal land details, past crop history, and optional images. Receive detailed insights with audio explanations in regional languages, plus chat support for further discussion.",
+  },
+  {
+    icon: <p className="h-6 w-6 text-google-red text-center">🔍</p>,
+    title: "Crop Analysis Center",
+    description:
+      "Analyze crops through uploaded images or videos. Get instant feedback and insights with audio explanations in your local language.",
+  },
+  {
+    icon: <p className="h-6 w-6 text-google-yellow text-center">📰</p>,
+    title: "Market & Policy Updates",
+    description:
+      "Stay updated with recent crop market prices and relevant government policies to make informed farming decisions.",
+  },
+];
+
 
   return (
     <div className="min-h-screen w-full overflow-hidden">

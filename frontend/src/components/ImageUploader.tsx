@@ -230,6 +230,8 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({ maxSize = 10, onImageSubm
                           <option value="Punjabi">Punjabi</option>
                           <option value="Tamil">Tamil</option>
                           <option value="Telugu">Telugu</option>
+                          <option value="Gujarati">Gujarati</option>
+                          <option value="Malayalam">Malayalam</option>
                         </select>
                       </div>
                       <Button
