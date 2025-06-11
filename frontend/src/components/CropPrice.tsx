@@ -6,8 +6,8 @@ export const CropPrice = () => {
 
   useEffect(() => {
     axios.post("https://crop-genesis.duckdns.org/get-market-price", {
-      state: "Rajasthan",
-      district: "Kota"
+      state: "Uttar Pradesh",
+      district: "Siddharth Nagar"
     })
       .then((res) => {
         if (Array.isArray(res.data.records)) {
