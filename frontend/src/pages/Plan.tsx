@@ -57,6 +57,7 @@ const Plan: React.FC = () => {
     const [images, setImages] = useState<UploadedFile[]>([]);
     const [conversations, setConversations] = useState<Conversation[]>([]);
     const [isProcessing, setIsProcessing] = useState<boolean>(false);
+    const [preferredLang, setPreferredLang] = useState<string>('English');
 
     const handleFormFieldChange = (field: keyof FormData, value: string) => {
         setFormData(prev => ({ ...prev, [field]: value }));
@@ -128,6 +129,7 @@ const Plan: React.FC = () => {
             apiFormData.append('irrigation', formData.field4);
             apiFormData.append('season', formData.field5);
             apiFormData.append('description', formData.field6);
+            apiFormData.append('lang', preferredLang);
 
             formData.images.forEach((image) => {
                 const base64Data = image.url.split(',')[1];
@@ -237,6 +239,7 @@ const Plan: React.FC = () => {
         try {
             const firstApiResponse = await axios.post('https://crop-genesis.duckdns.org/get-audio', {
                 text: initialHtmlResult,
+                lang: preferredLang,
             });
 
             setAudioUrl(`https://crop-genesis.duckdns.org/audio/${firstApiResponse.data.name}` || "");
@@ -271,6 +274,24 @@ const Plan: React.FC = () => {
             <div className="bg-white rounded-lg shadow-lg p-8 w-full max-w-2xl">
                 <h2 className="text-2xl font-bold text-center mb-6">Initial Setup Form</h2>
                 
+                {/* Preferred Language Dropdown */}
+                <div className="mb-6">
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Preferred language for explanation</label>
+                    <select
+                        value={preferredLang}
+                        onChange={e => setPreferredLang(e.target.value)}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    >
+                        <option value="English">English</option>
+                        <option value="Hindi">Hindi</option>
+                        <option value="Bengali">Bengali</option>
+                        <option value="Marathi">Marathi</option>
+                        <option value="Punjabi">Punjabi</option>
+                        <option value="Tamil">Tamil</option>
+                        <option value="Telugu">Telugu</option>
+                    </select>
+                </div>
+
                 {/* Form Fields - 2 fields per row */}
                 <div className="space-y-4 mb-6">
                     <div className="flex gap-4">

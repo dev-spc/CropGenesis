@@ -98,9 +98,12 @@ async def predict(features: CropFeatures):
 
     
 @app.post("/plan-predict/")
-async def predict_plan(location: Annotated[str, Form()], land_size: Annotated[str, Form()], last_crop: Annotated[str, Form()], irrigation: Annotated[str, Form()], season: Annotated[str, Form()], description: Annotated[Optional[str], Form()] = None,images: List[UploadFile] = File(default=[]), video: Optional[UploadFile] = File(None),lang: Annotated[str, Form()] = "English" ):
+async def predict_plan(location: Annotated[str, Form()], land_size: Annotated[str, Form()], 
+                       last_crop: Annotated[str, Form()], irrigation: Annotated[str, Form()], season: Annotated[str, Form()], 
+description: Annotated[Optional[str], Form()] = None,images: List[UploadFile] = File(default=[]), video: Optional[UploadFile] = File(None), 
+lang: Annotated[str, Form()] = "English" ):
     try:
-        prediction = await agriculure_planning(location, land_size, last_crop, irrigation, season, description, images, video,lang='English')
+        prediction = await agriculure_planning(location, land_size, last_crop, irrigation, season, description, images, video, lang)
         return {"code": str(prediction)} 
     except Exception as e:
         return {"error": str(e)} 
@@ -122,10 +125,14 @@ async def plant_analysis( description: Annotated[Optional[str], Form()] = None, 
 class TextRequest(BaseModel):
     text: str
 
+class AudioRequest(BaseModel):
+    text: str
+    lang: str
+
 @app.post("/get-audio/")
-async def get_audio(text: TextRequest):
+async def get_audio(body: AudioRequest):
     try: 
-        prediction = await audio_explanation_planning(text)
+        prediction = await audio_explanation_planning(body.text, body.lang)
         return {"name": prediction} 
     except Exception as e:
         return {"error": str(e)} 

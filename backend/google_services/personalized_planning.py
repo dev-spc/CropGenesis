@@ -4,11 +4,11 @@ from google.genai import types, Client
 import wave
 import tempfile
 import os
+import base64
 import io
 from dotenv import load_dotenv
 import cv2
 from google.genai.types import GenerateContentConfig
-from moviepy import AudioFileClip, ColorClip
 
 load_dotenv()
 
@@ -16,7 +16,6 @@ GEMINI_API_KEY=os.getenv("GEMINI_API_KEY")
 CHAT_SESSION = None
 
 def wave_file(filename, pcm, channels=1, rate=24000, sample_width=2):
-    """Save PCM audio data to a .wav file."""
     with wave.open(filename, "wb") as wf:
         wf.setnchannels(channels)
         wf.setsampwidth(sample_width)
@@ -224,11 +223,12 @@ Most importantly provide the complete info in the form of html code which can be
     return output_text
 
 
-async def audio_explanation_planning(text):
+async def audio_explanation_planning(text, lang = "English"):
     """
     Convert a technical farming plan into a simple spoken explanation and generate audio using Gemini.
     """
     full_prompt = f"""
+    The language of the content provided by you should be {lang}
     You are an experienced agricultural advisor known for your clear, friendly, and practical communication with farmers. Your task is to take a technical farming plan and rewrite it as a simple, spoken explanation that a farmer can easily understand and follow.  
 1. Read the provided explanation carefully.
 2. Rewrite the explanation as if you are talking to a farmer in the field, using simple words and a friendly, conversational tone.
@@ -263,18 +263,16 @@ Please rewrite it as described above.
             ),
         )
     )
+
     data = response.candidates[0].content.parts[0].inline_data.data
+
+    pcm_data = base64.b64decode(data)
+
     audio_file_wav = "audio_personalized_planning.wav"
-    audio_file_mp4 = "audio_personalized_planning.mp4"
+    wave_file(audio_file_wav, pcm_data)
     
-    wave_file(audio_file_wav, data)
-    audio_clip = AudioFileClip(audio_file_wav)
-    duration = audio_clip.duration
-    video_clip = ColorClip(size=(640, 480), color=(0, 0, 0), duration=duration)
-    video_clip = video_clip.with_fps(24)
-    final_clip = video_clip.with_audio(audio_clip)
-    final_clip.write_videofile(audio_file_mp4, codec="libx264", audio_codec="aac")
-    return audio_file_mp4
+    return audio_file_wav
+
 
 def ask_about_plan(user_question):
     global CHAT_SESSION

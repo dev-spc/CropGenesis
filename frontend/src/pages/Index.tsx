@@ -6,7 +6,6 @@ import { Button } from '@/components/ui/button';
 import AnimatedBackground from '@/components/AnimatedBackground';
 import Navbar from '@/components/Navbar';
 import farm from '/farm.png'
-import { CropPrice } from '@/components/CropPrice';
 
 const Index = () => {
   const navigate = useNavigate();
