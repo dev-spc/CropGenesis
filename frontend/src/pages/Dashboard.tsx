@@ -224,7 +224,7 @@ const Dashboard = () => {
               </CardHeader>
               <CardContent>
                 <div className="py-4">
-                  <ImageUploader setAnalysisResponse={setAnalysisResponse} maxSize={5} onImageSubmitted={handleImageSubmitted} />
+                  <ImageUploader data={analysisResponse} setAnalysisResponse={setAnalysisResponse} maxSize={5} onImageSubmitted={handleImageSubmitted} />
                 </div>
                 
                 {showAnalysisResults && (

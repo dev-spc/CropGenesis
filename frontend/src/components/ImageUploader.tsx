@@ -5,14 +5,16 @@ import { Image, Upload, Loader2, Check, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import axios from 'axios';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 interface ImageUploaderProps {
   maxSize?: number; // in MB
   onImageSubmitted?: () => void;
   setAnalysisResponse?: (response: string) => void;
+  data: any;
 }
 
-const ImageUploader: React.FC<ImageUploaderProps> = ({ maxSize = 10, onImageSubmitted, setAnalysisResponse }) => {
+const ImageUploader: React.FC<ImageUploaderProps> = ({ maxSize = 10, onImageSubmitted, setAnalysisResponse, data }) => {
   const [isDragging, setIsDragging] = useState(false);
   const [uploadedFile, setUploadedFile] = useState<string | null>(null);
   const [uploadedFileType, setUploadedFileType] = useState<'image' | 'video' | null>(null);
@@ -20,6 +22,9 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({ maxSize = 10, onImageSubm
   const [uploadProgress, setUploadProgress] = useState(0);
   const [imageError, setImageError] = useState<string | null>(null);
   const [isProcessed, setIsProcessed] = useState(false);
+  const [preferredLang, setPreferredLang] = useState<string>('English');
+  const [audioUrl, setAudioUrl] = useState<string>('');
+  const [isAudioLoading, setIsAudioLoading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const navigate = useNavigate();
 
@@ -195,12 +200,68 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({ maxSize = 10, onImageSubm
             </div>
             
             {isProcessed && !uploading && (
-              <Button 
-                className="mt-6 gap-2 bg-google-blue hover:bg-google-blue/90 text-white"
-                onClick={handleSubmit}
-              >
-                Submit {uploadedFileType === 'image' ? 'Image' : 'Video'}
-              </Button>
+              <>
+                <Button 
+                  className="mt-6 gap-2 bg-google-blue hover:bg-google-blue/90 text-white"
+                  onClick={handleSubmit}
+                >
+                  Submit {uploadedFileType === 'image' ? 'Image' : 'Video'}
+                </Button>
+              </>
+            )}
+            {/* Show analysis result and audio generation after analysis result is received */}
+            {typeof setAnalysisResponse === 'function' && !uploading && isProcessed && setAnalysisResponse && (
+              <>
+                {setAnalysisResponse && (
+                  <div className="mt-6 w-full">
+                    {/* Preferred Language Dropdown and Audio Button */}
+                    <div className="mt-4 flex flex-col items-center">
+                      <div className="mb-2 w-full">
+                        <label className="block text-sm font-medium text-gray-700 mb-2">Preferred language for explanation</label>
+                        <select
+                          value={preferredLang}
+                          onChange={e => setPreferredLang(e.target.value)}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        >
+                          <option value="English">English</option>
+                          <option value="Hindi">Hindi</option>
+                          <option value="Bengali">Bengali</option>
+                          <option value="Marathi">Marathi</option>
+                          <option value="Punjabi">Punjabi</option>
+                          <option value="Tamil">Tamil</option>
+                          <option value="Telugu">Telugu</option>
+                        </select>
+                      </div>
+                      <Button
+                        className="bg-green-500 hover:bg-green-600 text-white"
+                        disabled={isAudioLoading || !!audioUrl || !data}
+                        onClick={async () => {
+                          setIsAudioLoading(true);
+                          try {
+                            const resp = await axios.post('https://crop-genesis.duckdns.org/get-audio', {
+                              text: data,
+                              lang: preferredLang,
+                            });
+                            if (resp.data && resp.data.name) {
+                              setAudioUrl(`https://crop-genesis.duckdns.org/audio/${resp.data.name}`);
+                            } else {
+                              toast({ title: 'Audio Error', description: 'Invalid audio response', variant: 'destructive' });
+                            }
+                          } catch (err) {
+                            toast({ title: 'Audio Error', description: 'Failed to generate audio', variant: 'destructive' });
+                          }
+                          setIsAudioLoading(false);
+                        }}
+                      >
+                        {isAudioLoading ? 'Generating Audio...' : 'Generate Audio Explanation'}
+                      </Button>
+                      {audioUrl && (
+                        <audio src={audioUrl} controls className="mt-2 w-full" />
+                      )}
+                    </div>
+                  </div>
+                )}
+              </>
             )}
           </div>
         ) : (
