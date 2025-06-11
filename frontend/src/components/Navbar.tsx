@@ -15,6 +15,7 @@ const Navbar: React.FC = () => {
   const navItems = [
     { label: 'Home', path: '/' },
     { label: 'Dashboard', path: '/dashboard' },
+    { label: 'Government Policies', path: '/policies' },
   ];
   
   useEffect(() => {

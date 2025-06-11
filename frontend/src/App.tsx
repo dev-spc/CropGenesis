@@ -7,6 +7,7 @@ import Index from "./pages/Index";
 import Dashboard from "./pages/Dashboard";
 import NotFound from "./pages/NotFound";
 import Plan from "./pages/Plan";
+import PolicyDashboard from "./pages/Policy";
 
 const App = () => (
     <TooltipProvider>
@@ -17,6 +18,7 @@ const App = () => (
           <Route path="/" element={<Index />} />
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/plan" element={<Plan />} />
+          <Route path="/policies" element={<PolicyDashboard />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
