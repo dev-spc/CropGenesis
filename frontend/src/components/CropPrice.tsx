@@ -13,7 +13,7 @@ export const CropPrice = () => {
         if (Array.isArray(res.data.records)) {
           // Map API data to expected structure
           const prices = res.data.records.map((item: any) => ({
-            name: item.commodity,
+            name: item.commodity || items.Commodity,
             price: `₹${item.modal_price || item.Modal_Price}`
           }));
           setCropPrices(prices);
