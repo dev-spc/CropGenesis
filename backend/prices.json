@@ -1,0 +1,527 @@
+{
+  "index_name": "35985678-0d79-46b4-9ed6-6f13308a1d24",
+  "title": "Variety-wise Daily Market Prices Data of Commodity",
+  "desc": "Variety-wise Daily Market Prices Data of Commodity",
+  "org_type": "Central",
+  "org": [
+    "Ministry of Agriculture and Farmers Welfare",
+    "Department of Agriculture and Farmers Welfare",
+    "Directorate of Marketing and Inspection (DMI)"
+  ],
+  "sector": [
+    "Agriculture",
+    "Agricultural Marketing"
+  ],
+  "source": "data.gov.in",
+  "catalog_uuid": "6141ea17-a69d-4713-b600-0a43c8fd9a6c",
+  "visualizable": "0",
+  "active": "1",
+  "created": 1695098583,
+  "updated": 1749688826,
+  "created_date": "2023-09-19T06:43:03Z",
+  "updated_date": "2025-06-12T00:40:26Z",
+  "external_ws": 0,
+  "external_ws_url": "",
+  "target_bucket": {
+    "index": "agmarknet_new",
+    "type": "6141ea17-a69d-4713-b600-0a43c8fd9a6c",
+    "field": "35985678-0d79-46b4-9ed6-6f13308a1d24"
+  },
+  "field": [
+    {
+      "name": "State",
+      "id": "State",
+      "type": "keyword"
+    },
+    {
+      "name": "District",
+      "id": "District",
+      "type": "keyword"
+    },
+    {
+      "name": "Market",
+      "id": "Market",
+      "type": "keyword"
+    },
+    {
+      "name": "Commodity",
+      "id": "Commodity",
+      "type": "keyword"
+    },
+    {
+      "name": "Variety",
+      "id": "Variety",
+      "type": "keyword"
+    },
+    {
+      "name": "Grade",
+      "id": "Grade",
+      "type": "keyword"
+    },
+    {
+      "name": "Arrival_Date",
+      "id": "Arrival_Date",
+      "type": "date"
+    },
+    {
+      "name": "Min_Price",
+      "id": "Min_Price",
+      "type": "keyword"
+    },
+    {
+      "name": "Max_Price",
+      "id": "Max_Price",
+      "type": "keyword"
+    },
+    {
+      "name": "Modal_Price",
+      "id": "Modal_Price",
+      "type": "keyword"
+    },
+    {
+      "name": "Commodity_Code",
+      "id": "Commodity_Code",
+      "type": "keyword"
+    }
+  ],
+  "field_dependent": {
+    "State": {
+      "parent": "State",
+      "child": "District"
+    }
+  },
+  "order": [
+    {
+      "name": "Market",
+      "id": "Market"
+    },
+    {
+      "name": "Commodity",
+      "id": "Commodity"
+    }
+  ],
+  "field_exposed": [
+    {
+      "name": "State",
+      "id": "State",
+      "type": "keyword",
+      "mandatory": true
+    },
+    {
+      "name": "District",
+      "id": "District",
+      "type": "keyword",
+      "mandatory": true
+    },
+    {
+      "name": "Commodity",
+      "id": "Commodity",
+      "type": "keyword"
+    },
+    {
+      "name": "Arrival Date",
+      "format": "dd-MM-yyyy",
+      "id": "Arrival_Date",
+      "type": "date"
+    }
+  ],
+  "message": "Resource lists",
+  "version": "2.2.0",
+  "status": "ok",
+  "total": 94405,
+  "count": 30,
+  "limit": "30",
+  "offset": "0",
+  "records": [
+    {
+      "State": "Uttar Pradesh",
+      "District": "Siddharth Nagar",
+      "Market": "Wansi",
+      "Commodity": "Onion",
+      "Variety": "Red",
+      "Grade": "FAQ",
+      "Arrival_Date": "02/08/2007",
+      "Min_Price": "1160",
+      "Max_Price": "1180",
+      "Modal_Price": "1170",
+      "Commodity_Code": "23"
+    },
+    {
+      "State": "Uttar Pradesh",
+      "District": "Siddharth Nagar",
+      "Market": "Wansi",
+      "Commodity": "Onion",
+      "Variety": "Red",
+      "Grade": "FAQ",
+      "Arrival_Date": "18/08/2007",
+      "Min_Price": "1245",
+      "Max_Price": "1280",
+      "Modal_Price": "1260",
+      "Commodity_Code": "23"
+    },
+    {
+      "State": "Uttar Pradesh",
+      "District": "Siddharth Nagar",
+      "Market": "Wansi",
+      "Commodity": "Onion",
+      "Variety": "Red",
+      "Grade": "FAQ",
+      "Arrival_Date": "21/08/2007",
+      "Min_Price": "1285",
+      "Max_Price": "1325",
+      "Modal_Price": "1300",
+      "Commodity_Code": "23"
+    },
+    {
+      "State": "Uttar Pradesh",
+      "District": "Siddharth Nagar",
+      "Market": "Wansi",
+      "Commodity": "Onion",
+      "Variety": "Red",
+      "Grade": "FAQ",
+      "Arrival_Date": "03/09/2007",
+      "Min_Price": "1625",
+      "Max_Price": "1625",
+      "Modal_Price": "1625",
+      "Commodity_Code": "23"
+    },
+    {
+      "State": "Uttar Pradesh",
+      "District": "Siddharth Nagar",
+      "Market": "Wansi",
+      "Commodity": "Onion",
+      "Variety": "Red",
+      "Grade": "FAQ",
+      "Arrival_Date": "15/09/2007",
+      "Min_Price": "1750",
+      "Max_Price": "1790",
+      "Modal_Price": "1770",
+      "Commodity_Code": "23"
+    },
+    {
+      "State": "Uttar Pradesh",
+      "District": "Siddharth Nagar",
+      "Market": "Wansi",
+      "Commodity": "Onion",
+      "Variety": "Red",
+      "Grade": "FAQ",
+      "Arrival_Date": "24/09/2007",
+      "Min_Price": "1800",
+      "Max_Price": "1800",
+      "Modal_Price": "1800",
+      "Commodity_Code": "23"
+    },
+    {
+      "State": "Uttar Pradesh",
+      "District": "Siddharth Nagar",
+      "Market": "Wansi",
+      "Commodity": "Onion",
+      "Variety": "Red",
+      "Grade": "FAQ",
+      "Arrival_Date": "25/09/2007",
+      "Min_Price": "1800",
+      "Max_Price": "1800",
+      "Modal_Price": "1800",
+      "Commodity_Code": "23"
+    },
+    {
+      "State": "Uttar Pradesh",
+      "District": "Siddharth Nagar",
+      "Market": "Wansi",
+      "Commodity": "Onion",
+      "Variety": "Red",
+      "Grade": "FAQ",
+      "Arrival_Date": "08/10/2007",
+      "Min_Price": "1960",
+      "Max_Price": "1960",
+      "Modal_Price": "1960",
+      "Commodity_Code": "23"
+    },
+    {
+      "State": "Uttar Pradesh",
+      "District": "Siddharth Nagar",
+      "Market": "Wansi",
+      "Commodity": "Onion",
+      "Variety": "Red",
+      "Grade": "FAQ",
+      "Arrival_Date": "17/11/2007",
+      "Min_Price": "0",
+      "Max_Price": "0",
+      "Modal_Price": "1480",
+      "Commodity_Code": "23"
+    },
+    {
+      "State": "Uttar Pradesh",
+      "District": "Siddharth Nagar",
+      "Market": "Wansi",
+      "Commodity": "Onion",
+      "Variety": "Red",
+      "Grade": "FAQ",
+      "Arrival_Date": "03/12/2007",
+      "Min_Price": "0",
+      "Max_Price": "0",
+      "Modal_Price": "1000",
+      "Commodity_Code": "23"
+    },
+    {
+      "State": "Uttar Pradesh",
+      "District": "Siddharth Nagar",
+      "Market": "Wansi",
+      "Commodity": "Onion",
+      "Variety": "Red",
+      "Grade": "FAQ",
+      "Arrival_Date": "05/12/2007",
+      "Min_Price": "0",
+      "Max_Price": "0",
+      "Modal_Price": "970",
+      "Commodity_Code": "23"
+    },
+    {
+      "State": "Uttar Pradesh",
+      "District": "Siddharth Nagar",
+      "Market": "Wansi",
+      "Commodity": "Onion",
+      "Variety": "Red",
+      "Grade": "FAQ",
+      "Arrival_Date": "06/12/2007",
+      "Min_Price": "0",
+      "Max_Price": "0",
+      "Modal_Price": "970",
+      "Commodity_Code": "23"
+    },
+    {
+      "State": "Uttar Pradesh",
+      "District": "Siddharth Nagar",
+      "Market": "Wansi",
+      "Commodity": "Onion",
+      "Variety": "Red",
+      "Grade": "FAQ",
+      "Arrival_Date": "22/12/2007",
+      "Min_Price": "0",
+      "Max_Price": "0",
+      "Modal_Price": "800",
+      "Commodity_Code": "23"
+    },
+    {
+      "State": "Uttar Pradesh",
+      "District": "Siddharth Nagar",
+      "Market": "Wansi",
+      "Commodity": "Onion",
+      "Variety": "Red",
+      "Grade": "FAQ",
+      "Arrival_Date": "26/12/2007",
+      "Min_Price": "0",
+      "Max_Price": "0",
+      "Modal_Price": "810",
+      "Commodity_Code": "23"
+    },
+    {
+      "State": "Uttar Pradesh",
+      "District": "Siddharth Nagar",
+      "Market": "Wansi",
+      "Commodity": "Mustard",
+      "Variety": "Lohi Black",
+      "Grade": "FAQ",
+      "Arrival_Date": "13/08/2007",
+      "Min_Price": "1860",
+      "Max_Price": "1925",
+      "Modal_Price": "1900",
+      "Commodity_Code": "12"
+    },
+    {
+      "State": "Uttar Pradesh",
+      "District": "Siddharth Nagar",
+      "Market": "Wansi",
+      "Commodity": "Mustard",
+      "Variety": "Lohi Black",
+      "Grade": "FAQ",
+      "Arrival_Date": "18/08/2007",
+      "Min_Price": "1900",
+      "Max_Price": "1925",
+      "Modal_Price": "1910",
+      "Commodity_Code": "12"
+    },
+    {
+      "State": "Uttar Pradesh",
+      "District": "Siddharth Nagar",
+      "Market": "Wansi",
+      "Commodity": "Mustard",
+      "Variety": "Lohi Black",
+      "Grade": "FAQ",
+      "Arrival_Date": "20/08/2007",
+      "Min_Price": "1880",
+      "Max_Price": "1930",
+      "Modal_Price": "1900",
+      "Commodity_Code": "12"
+    },
+    {
+      "State": "Uttar Pradesh",
+      "District": "Siddharth Nagar",
+      "Market": "Wansi",
+      "Commodity": "Mustard",
+      "Variety": "Lohi Black",
+      "Grade": "FAQ",
+      "Arrival_Date": "01/09/2007",
+      "Min_Price": "1800",
+      "Max_Price": "1835",
+      "Modal_Price": "1825",
+      "Commodity_Code": "12"
+    },
+    {
+      "State": "Uttar Pradesh",
+      "District": "Siddharth Nagar",
+      "Market": "Wansi",
+      "Commodity": "Mustard",
+      "Variety": "Lohi Black",
+      "Grade": "FAQ",
+      "Arrival_Date": "10/09/2007",
+      "Min_Price": "1800",
+      "Max_Price": "1800",
+      "Modal_Price": "1800",
+      "Commodity_Code": "12"
+    },
+    {
+      "State": "Uttar Pradesh",
+      "District": "Siddharth Nagar",
+      "Market": "Wansi",
+      "Commodity": "Mustard",
+      "Variety": "Lohi Black",
+      "Grade": "FAQ",
+      "Arrival_Date": "18/09/2007",
+      "Min_Price": "1810",
+      "Max_Price": "1850",
+      "Modal_Price": "1830",
+      "Commodity_Code": "12"
+    },
+    {
+      "State": "Uttar Pradesh",
+      "District": "Siddharth Nagar",
+      "Market": "Wansi",
+      "Commodity": "Mustard",
+      "Variety": "Lohi Black",
+      "Grade": "FAQ",
+      "Arrival_Date": "03/10/2007",
+      "Min_Price": "1770",
+      "Max_Price": "1770",
+      "Modal_Price": "1770",
+      "Commodity_Code": "12"
+    },
+    {
+      "State": "Uttar Pradesh",
+      "District": "Siddharth Nagar",
+      "Market": "Wansi",
+      "Commodity": "Mustard",
+      "Variety": "Lohi Black",
+      "Grade": "FAQ",
+      "Arrival_Date": "16/10/2007",
+      "Min_Price": "0",
+      "Max_Price": "0",
+      "Modal_Price": "1760",
+      "Commodity_Code": "12"
+    },
+    {
+      "State": "Uttar Pradesh",
+      "District": "Siddharth Nagar",
+      "Market": "Wansi",
+      "Commodity": "Mustard",
+      "Variety": "Lohi Black",
+      "Grade": "FAQ",
+      "Arrival_Date": "20/10/2007",
+      "Min_Price": "0",
+      "Max_Price": "0",
+      "Modal_Price": "1760",
+      "Commodity_Code": "12"
+    },
+    {
+      "State": "Uttar Pradesh",
+      "District": "Siddharth Nagar",
+      "Market": "Wansi",
+      "Commodity": "Mustard",
+      "Variety": "Lohi Black",
+      "Grade": "FAQ",
+      "Arrival_Date": "24/10/2007",
+      "Min_Price": "0",
+      "Max_Price": "0",
+      "Modal_Price": "1760",
+      "Commodity_Code": "12"
+    },
+    {
+      "State": "Uttar Pradesh",
+      "District": "Siddharth Nagar",
+      "Market": "Wansi",
+      "Commodity": "Mustard",
+      "Variety": "Lohi Black",
+      "Grade": "FAQ",
+      "Arrival_Date": "31/10/2007",
+      "Min_Price": "0",
+      "Max_Price": "0",
+      "Modal_Price": "1760",
+      "Commodity_Code": "12"
+    },
+    {
+      "State": "Uttar Pradesh",
+      "District": "Siddharth Nagar",
+      "Market": "Wansi",
+      "Commodity": "Mustard",
+      "Variety": "Lohi Black",
+      "Grade": "FAQ",
+      "Arrival_Date": "13/11/2007",
+      "Min_Price": "0",
+      "Max_Price": "0",
+      "Modal_Price": "1750",
+      "Commodity_Code": "12"
+    },
+    {
+      "State": "Uttar Pradesh",
+      "District": "Siddharth Nagar",
+      "Market": "Wansi",
+      "Commodity": "Mustard",
+      "Variety": "Lohi Black",
+      "Grade": "FAQ",
+      "Arrival_Date": "20/11/2007",
+      "Min_Price": "0",
+      "Max_Price": "0",
+      "Modal_Price": "1730",
+      "Commodity_Code": "12"
+    },
+    {
+      "State": "Uttar Pradesh",
+      "District": "Siddharth Nagar",
+      "Market": "Wansi",
+      "Commodity": "Mustard",
+      "Variety": "Lohi Black",
+      "Grade": "FAQ",
+      "Arrival_Date": "22/11/2007",
+      "Min_Price": "0",
+      "Max_Price": "0",
+      "Modal_Price": "1755",
+      "Commodity_Code": "12"
+    },
+    {
+      "State": "Uttar Pradesh",
+      "District": "Siddharth Nagar",
+      "Market": "Wansi",
+      "Commodity": "Mustard",
+      "Variety": "Lohi Black",
+      "Grade": "FAQ",
+      "Arrival_Date": "27/11/2007",
+      "Min_Price": "0",
+      "Max_Price": "0",
+      "Modal_Price": "1755",
+      "Commodity_Code": "12"
+    },
+    {
+      "State": "Uttar Pradesh",
+      "District": "Siddharth Nagar",
+      "Market": "Wansi",
+      "Commodity": "Mustard",
+      "Variety": "Lohi Black",
+      "Grade": "FAQ",
+      "Arrival_Date": "08/12/2007",
+      "Min_Price": "0",
+      "Max_Price": "0",
+      "Modal_Price": "1830",
+      "Commodity_Code": "12"
+    }
+  ]
+}

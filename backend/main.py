@@ -16,6 +16,7 @@ from google_services.detect_plant_disease import plant_analysis_func
 from google_services.general_chatbot import GeminiChatbot
 import httpx
 import urllib.parse
+import json
 
 load_dotenv()
 
@@ -198,7 +199,13 @@ async def get_mandi_data(location: LocationInput):
         response = await client.get(full_url)
 
     if response.status_code == 200:
-        return response.json()
+        data = response.json()
+        if len(data.get("records", [])) < 30:
+            # Return local fallback file
+            with open("prices.json", "r") as f:
+                local_data = json.load(f)
+            return local_data
+        return data
     else:
         return {
             "error": "Failed to fetch mandi data",

@@ -11,7 +11,7 @@ genai.configure(api_key=GEMINI_API_KEY)
 
 class GeminiChatbot:
     def __init__(self):
-        self.model = genai.GenerativeModel("gemini-2.5-flash-preview-05-20")
+        self.model = genai.GenerativeModel("gemini-2.0-flash-lite")
         self.chat_sessions = {}
         self.system_prompt = (
           " You are an intelligent and friendly agricultural assistant chatbot designed to help farmers with a wide range of farming queries. Your responses should be accurate, evidence-based, and tailored to the farmer’s location, crop, and practices. Always use simple language, explain complex terms clearly, and keep your answers within 100 words unless the user requests a detailed explanation. Use Google search when needed to provide the most current information.Always give response in a simple text paragraph and no markdown"
